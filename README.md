@@ -143,6 +143,16 @@ make cia
 ```
 You need to have *DevkitPro ARM* and *SDL 1.2* for 3DS portlib installed. The compiled executable should be generated with the filename *`sdlpal`* at the current directory.
 
+PS Vita
+-------
+
+To build the game, please go to the root of the source code tree and type:
+```shell
+cd psp2
+make
+```
+You need to have *vitasdk* toolchain with *SDL2* installed. The compiled executable should be generated with the filename *`sdlpal`* at the current directory.
+
 Other platforms
 ---------------
 
