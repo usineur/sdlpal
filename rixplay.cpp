@@ -25,6 +25,7 @@
 #include "palcfg.h"
 #include "players.h"
 #include "audio.h"
+#include "util.h"
 
 #include "resampler.h"
 #include "adplug/opl.h"
@@ -297,6 +298,38 @@ RIX_Shutdown(
 	}
 }
 
+#ifdef __PSP2__
+VOID
+RIX_Resume(
+	VOID     *object
+)
+/*++
+	Purpose:
+
+	Resume the RIX player subsystem.
+
+	Parameters:
+
+	None.
+
+	Return value:
+
+	None.
+
+--*/
+{
+	if (object != NULL)
+	{
+		LPRIXPLAYER pRixPlayer = (LPRIXPLAYER)object;
+		if(pRixPlayer->rix->fp)
+		{
+			fclose(pRixPlayer->rix->fp);
+			pRixPlayer->rix->fp = UTIL_OpenFile("mus.mkf");
+		}
+	}
+}
+#endif
+
 static BOOL
 RIX_Play(
 	VOID     *object,
@@ -399,6 +432,9 @@ RIX_Init(
 		pRixPlayer->FillBuffer = RIX_FillBuffer;
 		pRixPlayer->Shutdown = RIX_Shutdown;
 		pRixPlayer->Play = RIX_Play;
+#ifdef __PSP2__
+		pRixPlayer->Resume = RIX_Resume;
+#endif
 	}
 
 	if (gConfig.fUseSurroundOPL)

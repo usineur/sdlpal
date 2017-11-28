@@ -932,6 +932,35 @@ SOUND_FillBuffer(
 	}
 }
 
+#ifdef __PSP2__
+VOID
+SOUND_Resume(
+	VOID     *object
+)
+/*++
+  Purpose:
+
+	Resume the sound subsystem.
+
+  Parameters:
+
+	None.
+
+  Return value:
+
+	None.
+
+--*/
+{
+	LPSOUNDPLAYER player = (LPSOUNDPLAYER)object;
+	if (player && player->mkf)
+	{
+		fclose(player->mkf);
+		player->mkf = UTIL_OpenFile("sounds.mkf");
+	}
+}
+#endif
+
 LPAUDIOPLAYER
 SOUND_Init(
 	VOID
@@ -976,6 +1005,9 @@ SOUND_Init(
 			player->Play = SOUND_Play;
 			player->FillBuffer = SOUND_FillBuffer;
 			player->Shutdown = SOUND_Shutdown;
+#ifdef __PSP2__
+			player->Resume = SOUND_Resume;
+#endif
 
 			player->LoadSound = func[i];
 			player->mkf = mkf;

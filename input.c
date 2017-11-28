@@ -652,6 +652,7 @@ VOID
  
  --*/
 {
+#ifndef __PSP2__
    if( g_InputState.axisX == 1 && g_InputState.axisY >= 0 )
    {
       g_InputState.prevdir = g_InputState.dir;
@@ -683,6 +684,29 @@ VOID
       if(!input_event_filter)
          g_InputState.dwKeyPress = kKeyNone;
    }
+#endif
+}
+
+SHORT
+PAL_JoystickGetAxis(
+	INT axis
+)
+/*++
+  Purpose:
+
+	Get the current state of an axis control on a joystick.
+
+  Parameters:
+
+	[IN] axis - The axis to query.
+
+  Return value:
+
+	Current state of the requested axis control.
+
+ --*/
+{
+	return SDL_JoystickGetAxis(g_pJoy, axis);
 }
 
 #endif

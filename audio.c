@@ -602,3 +602,14 @@ AUDIO_SoundEnabled(
 {
    return gAudioDevice.fSoundEnabled;
 }
+
+#ifdef __PSP2__
+VOID
+AUDIO_Resume(
+	VOID
+)
+{
+	gAudioDevice.pMusPlayer->Resume(gAudioDevice.pMusPlayer);
+	gAudioDevice.pSoundPlayer->Resume(gAudioDevice.pSoundPlayer);
+}
+#endif

@@ -30,10 +30,18 @@
 
 typedef struct tagAUDIOPLAYER
 {
+#ifdef __PSP2__
+#define AUDIOPLAYER_COMMONS \
+	VOID (*Shutdown)(VOID*); \
+	BOOL (*Play)(VOID*, INT, BOOL, FLOAT); \
+	VOID (*FillBuffer)(VOID*, LPBYTE, INT); \
+	VOID (*Resume)(VOID*)
+#else
 #define AUDIOPLAYER_COMMONS \
 	VOID (*Shutdown)(VOID*); \
 	BOOL (*Play)(VOID*, INT, BOOL, FLOAT); \
 	VOID (*FillBuffer)(VOID*, LPBYTE, INT)
+#endif
 
 	AUDIOPLAYER_COMMONS;
 } AUDIOPLAYER, *LPAUDIOPLAYER;

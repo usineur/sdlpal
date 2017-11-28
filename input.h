@@ -95,6 +95,14 @@ PAL_RegisterInputFilter(
    void (*shutdown_filter)()
 );
 
+#if PAL_HAS_JOYSTICKS
+SHORT
+PAL_JoystickGetAxis(
+	INT axis
+);
+
+#endif
+
 extern volatile PALINPUTSTATE g_InputState;
 
 extern BOOL g_fUseJoystick;

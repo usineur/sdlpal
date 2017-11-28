@@ -103,7 +103,11 @@ static SDL_Texture *VIDEO_CreateTexture(int width, int height)
 	//
 	// Create texture for screen.
 	//
+#ifdef __PSP2__
+	return SDL_CreateTexture(gpRenderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, texture_width, texture_height);
+#else
 	return SDL_CreateTexture(gpRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texture_width, texture_height);
+#endif
 }
 #endif
 
@@ -335,6 +339,9 @@ VIDEO_RenderCopy(
 {
 	void *texture_pixels;
 	int texture_pitch;
+#ifdef __PSP2__
+	SDL_Rect srcrect, dstrect;
+#endif
 
 	SDL_LockTexture(gpTexture, NULL, &texture_pixels, &texture_pitch);
 	memset(texture_pixels, 0, gTextureRect.y * texture_pitch);
@@ -351,7 +358,22 @@ VIDEO_RenderCopy(
 	memset(pixels, 0, gTextureRect.y * texture_pitch);
 	SDL_UnlockTexture(gpTexture);
 
+#ifndef __PSP2__
 	SDL_RenderCopy(gpRenderer, gpTexture, NULL, NULL);
+#else
+	srcrect.x = 0;
+	srcrect.y = 0;
+	srcrect.w = gpScreenReal->w;
+	srcrect.h = gpScreenReal->h;
+
+	dstrect.h = VITA_SCREEN_H;
+	dstrect.w = (float)srcrect.w * ((float)dstrect.h / (float)srcrect.h);
+	dstrect.y = 0;
+	dstrect.x = (VITA_SCREEN_W - dstrect.w) / 2;
+
+	SDL_RenderClear(gpRenderer);
+	SDL_RenderCopy(gpRenderer, gpTexture, &srcrect, &dstrect);
+#endif
 	if (gpTouchOverlay)
 	{
 		SDL_RenderCopy(gpRenderer, gpTouchOverlay, NULL, &gOverlayRect);

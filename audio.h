@@ -89,6 +89,13 @@ AUDIO_SoundEnabled(
    VOID
 );
 
+#ifdef __PSP2__
+VOID
+AUDIO_Resume(
+	VOID
+);
+#endif
+
 PAL_C_LINKAGE_END
 
 #define AUDIO_IsIntegerConversion(a) (((a) % gConfig.iSampleRate) == 0 || (gConfig.iSampleRate % (a)) == 0)
