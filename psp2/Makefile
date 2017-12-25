@@ -17,8 +17,8 @@ LDFLAGS  = -L./vitashaderlibs/vita2d_fbo/lib \
 	-L./vitashaderlibs/vita-shader-collection/lib \
 	-lSDL2 -lvita2d -lvitashaders -lvorbisfile -lvorbis -logg \
 	-lSceAppUtil_stub -lSceAudio_stub -lSceCommonDialog_stub \
-	-lSceCtrl_stub -lSceDisplay_stub -lSceGxm_stub -lScePower_stub \
-	-lSceSysmodule_stub -lSceTouch_stub
+	-lSceCtrl_stub -lSceDisplay_stub -lSceGxm_stub -lSceHid_stub \
+	-lScePower_stub -lSceSysmodule_stub -lSceTouch_stub
 
 all: $(TARGET).vpk
 
