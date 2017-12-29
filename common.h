@@ -116,11 +116,7 @@ typedef const BYTE *LPCBYTE;
 #else
 
 # include <unistd.h>
-# ifdef __PSP2__
-#  include "psp2-dirent.h"
-# else
-#  include <dirent.h>
-# endif
+# include <dirent.h>
 # ifdef __APPLE__
 #  include <objc/objc.h>
 # endif
