@@ -10,12 +10,10 @@ CFILES   = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES   = $(CFILES:.c=$(INTER).o) $(CPPFILES:.cpp=$(INTER).o)
 
-CCFLAGS  = -Wl,-q -O3 -g -D__PSP2__ -I. -I.. -I./vitashaderlibs/vita2d_fbo/includes/ -I./vitashaderlibs/vita-shader-collection/includes/ -I$(VITASDK)/$(PREFIX)/include/SDL2
+CCFLAGS  = -Wl,-q -O3 -g -D__PSP2__ -I. -I.. -I$(VITASDK)/$(PREFIX)/include/SDL2 -I$(VITASDK)/$(PREFIX)/include/vitashaders
 CXXFLAGS = $(CCFLAGS) -std=c++11
 CFLAGS   = $(CCFLAGS) -std=gnu99
-LDFLAGS  = -L./vitashaderlibs/vita2d_fbo/lib \
-	-L./vitashaderlibs/vita-shader-collection/lib \
-	-lSDL2 -lvita2d -lvitashaders -lvorbisfile -lvorbis -logg \
+LDFLAGS  = -lSDL2 -lvita2d_fbo -lvitashaders -lvorbisfile -lvorbis -logg \
 	-lSceAppUtil_stub -lSceAudio_stub -lSceCommonDialog_stub \
 	-lSceCtrl_stub -lSceDisplay_stub -lSceGxm_stub -lSceHid_stub \
 	-lScePower_stub -lSceSysmodule_stub -lSceTouch_stub
