@@ -298,7 +298,7 @@ RIX_Shutdown(
 	}
 }
 
-#ifdef __PSP2__
+#ifdef __vita__
 VOID
 RIX_Resume(
 	VOID     *object
@@ -432,7 +432,7 @@ RIX_Init(
 		pRixPlayer->FillBuffer = RIX_FillBuffer;
 		pRixPlayer->Shutdown = RIX_Shutdown;
 		pRixPlayer->Play = RIX_Play;
-#ifdef __PSP2__
+#ifdef __vita__
 		pRixPlayer->Resume = RIX_Resume;
 #endif
 	}

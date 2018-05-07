@@ -35,7 +35,7 @@ class CrixPlayer: public CPlayer
 {
  public:
   static CPlayer *factory(Copl *newopl);
-#ifdef __PSP2__
+#ifdef __vita__
   FILE *fp;
 #endif
 
@@ -66,7 +66,7 @@ class CrixPlayer: public CPlayer
   uint32_t *extra_regs;
   uint8_t *extra_vals;
 #endif
-#ifndef __PSP2__
+#ifndef __vita__
   FILE *fp;
 #endif
 

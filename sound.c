@@ -932,7 +932,7 @@ SOUND_FillBuffer(
 	}
 }
 
-#ifdef __PSP2__
+#ifdef __vita__
 VOID
 SOUND_Resume(
 	VOID     *object
@@ -1005,7 +1005,7 @@ SOUND_Init(
 			player->Play = SOUND_Play;
 			player->FillBuffer = SOUND_FillBuffer;
 			player->Shutdown = SOUND_Shutdown;
-#ifdef __PSP2__
+#ifdef __vita__
 			player->Resume = SOUND_Resume;
 #endif
 

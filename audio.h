@@ -89,7 +89,7 @@ AUDIO_SoundEnabled(
    VOID
 );
 
-#ifdef __PSP2__
+#ifdef __vita__
 VOID
 AUDIO_Resume(
 	VOID

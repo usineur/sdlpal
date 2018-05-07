@@ -51,7 +51,7 @@ static BOOL bScaleScreen = PAL_SCALE_SCREEN;
 static WORD               g_wShakeTime       = 0;
 static WORD               g_wShakeLevel      = 0;
 
-#ifdef __PSP2__
+#ifdef __vita__
 #include "psp2_shader.h"
 #include <vita2d.h>
 vita2d_shader *shader = NULL;
@@ -109,7 +109,7 @@ static SDL_Texture *VIDEO_CreateTexture(int width, int height)
 	//
 	// Create texture for screen.
 	//
-#ifdef __PSP2__
+#ifdef __vita__
 	return SDL_CreateTexture(gpRenderer, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, texture_width, texture_height);
 #else
 	return SDL_CreateTexture(gpRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texture_width, texture_height);
@@ -159,7 +159,7 @@ VIDEO_Startup(
       return -1;
    }
 
-#ifdef __PSP2__
+#ifdef __vita__
    // For the sharp_bilinear_simple shader to work, linear filtering has to be enabled.
    // This is done by a simple command here, supported by SDL2 for Vita since 2017/12/24.
    // This affects all textures created after this command.
@@ -337,7 +337,7 @@ VIDEO_Shutdown(
       SDL_FreePalette(gpPalette);
    }
 
-#ifdef __PSP2__
+#ifdef __vita__
    clearPSP2Shader(shader);
 #endif
 #endif
@@ -359,7 +359,7 @@ VIDEO_RenderCopy(
 {
 	void *texture_pixels;
 	int texture_pitch;
-#ifdef __PSP2__
+#ifdef __vita__
 	SDL_Rect srcrect, dstrect;
 #endif
 
@@ -378,7 +378,7 @@ VIDEO_RenderCopy(
 	memset(pixels, 0, gTextureRect.y * texture_pitch);
 	SDL_UnlockTexture(gpTexture);
 
-#ifndef __PSP2__
+#ifndef __vita__
 	SDL_RenderCopy(gpRenderer, gpTexture, NULL, NULL);
 #else
 	srcrect.x = 0;

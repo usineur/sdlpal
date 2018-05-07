@@ -603,7 +603,7 @@ AUDIO_SoundEnabled(
    return gAudioDevice.fSoundEnabled;
 }
 
-#ifdef __PSP2__
+#ifdef __vita__
 VOID
 AUDIO_Resume(
 	VOID

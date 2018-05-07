@@ -652,7 +652,7 @@ VOID
  
  --*/
 {
-#ifndef __PSP2__
+#ifndef __vita__
    if( g_InputState.axisX == 1 && g_InputState.axisY >= 0 )
    {
       g_InputState.prevdir = g_InputState.dir;

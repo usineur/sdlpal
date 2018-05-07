@@ -10,7 +10,7 @@ CFILES   = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES   = $(CFILES:.c=$(INTER).o) $(CPPFILES:.cpp=$(INTER).o)
 
-CCFLAGS  = -Wl,-q -O3 -g -D__PSP2__ -I. -I.. -I$(VITASDK)/$(PREFIX)/include/SDL2 -I$(VITASDK)/$(PREFIX)/include/vitashaders
+CCFLAGS  = -Wl,-q -O3 -g -I. -I.. -I$(VITASDK)/$(PREFIX)/include/SDL2 -I$(VITASDK)/$(PREFIX)/include/vitashaders
 CXXFLAGS = $(CCFLAGS) -std=c++11
 CFLAGS   = $(CCFLAGS) -std=gnu99
 LDFLAGS  = -lSDL2 -lvita2d_fbo -lvitashaders -lvorbisfile -lvorbis -logg \
