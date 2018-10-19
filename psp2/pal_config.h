@@ -3,20 +3,17 @@
 
 # define PAL_HAS_JOYSTICKS     1
 # define PAL_HAS_MOUSE         0
+# define PAL_HAS_MP3           0
+# define PAL_HAS_OGG           0
 # define PAL_PREFIX            "ux0:data/sdlpal/"
 # define PAL_SAVE_PREFIX       "ux0:data/sdlpal/"
 
 # define PAL_DEFAULT_WINDOW_WIDTH   640
 # define PAL_DEFAULT_WINDOW_HEIGHT  480
 
-# if SDL_VERSION_ATLEAST(2, 0, 0)
-#  define PAL_VIDEO_INIT_FLAGS  (SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE)
-# else
-#  define PAL_VIDEO_INIT_FLAGS  (SDL_SWSURFACE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0))
-# endif
-
-# define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK)
-# define PAL_SCALE_SCREEN   TRUE
+# define PAL_VIDEO_INIT_FLAGS (SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE)
+# define PAL_SDL_INIT_FLAGS   (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK)
+# define PAL_SCALE_SCREEN     TRUE
 
 # define PAL_PLATFORM         "PS Vita"
 # define PAL_CREDIT           "usineur"
@@ -52,6 +49,5 @@
 # define STICK_DOWN 1
 # define STICK_LEFT 2
 # define STICK_RIGHT 3
-
 
 #endif

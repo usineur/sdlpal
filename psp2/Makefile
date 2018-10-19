@@ -5,15 +5,15 @@ INTER    = .vita
 
 PREFIX   = arm-vita-eabi
 
-SOURCES  = . .. ../adplug ../libmad
+SOURCES  = . .. ../adplug
 CFILES   = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES   = $(CFILES:.c=$(INTER).o) $(CPPFILES:.cpp=$(INTER).o)
 
 CCFLAGS  = -Wl,-q -O3 -g -I. -I.. -I$(VITASDK)/$(PREFIX)/include/SDL2 -I$(VITASDK)/$(PREFIX)/include/vitashaders
 CXXFLAGS = $(CCFLAGS) -std=c++11
-CFLAGS   = $(CCFLAGS) -std=gnu99
-LDFLAGS  = -lSDL2 -lvita2d_fbo -lvitashaders -lvorbisfile -lvorbis -logg \
+CFLAGS   = $(CCFLAGS) -std=gnu99 -D_GNU_SOURCE
+LDFLAGS  = -lSDL2 -lvita2d_fbo -lvitashaders \
 	-lSceAppUtil_stub -lSceAudio_stub -lSceCommonDialog_stub \
 	-lSceCtrl_stub -lSceDisplay_stub -lSceGxm_stub -lSceHid_stub \
 	-lScePower_stub -lSceSysmodule_stub -lSceTouch_stub
