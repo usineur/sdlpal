@@ -321,10 +321,11 @@ RIX_Resume(
 	if (object != NULL)
 	{
 		LPRIXPLAYER pRixPlayer = (LPRIXPLAYER)object;
-		if(pRixPlayer->rix->fp)
+		FILE *rfp = pRixPlayer->rix->getfp();
+		if (rfp)
 		{
-			fclose(pRixPlayer->rix->fp);
-			pRixPlayer->rix->fp = UTIL_OpenFile("mus.mkf");
+			fclose(rfp);
+			rfp = UTIL_OpenFile("mus.mkf");
 		}
 	}
 }

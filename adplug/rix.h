@@ -35,9 +35,6 @@ class CrixPlayer: public CPlayer
 {
  public:
   static CPlayer *factory(Copl *newopl);
-#ifdef __vita__
-  FILE *fp;
-#endif
 
   CrixPlayer(Copl *newopl);
   ~CrixPlayer();
@@ -56,6 +53,10 @@ class CrixPlayer: public CPlayer
   void set_extra_init(uint32_t* regs, uint8_t* datas, int n);
 #endif
 
+#ifdef __vita__
+  FILE * getfp() { return fp; }
+#endif
+
  protected:	
   typedef struct {
     uint8_t v[14];
@@ -66,10 +67,7 @@ class CrixPlayer: public CPlayer
   uint32_t *extra_regs;
   uint8_t *extra_vals;
 #endif
-#ifndef __vita__
   FILE *fp;
-#endif
-
   int subsongs;
   uint8_t rix_buf[16384];  /* rix files' f_buffer */
   uint16_t f_buffer[300];//9C0h-C18h
