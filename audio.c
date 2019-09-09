@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -33,12 +33,16 @@
 
 #define PAL_CDTRACK_BASE    10000
 
+/* WASAPI need fewer samples for less gapping */
+#ifndef PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI
+# define PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI   512
+#endif
+
 typedef void(*ResampleMixFunction)(void *, const void *, int, void *, int, int, uint8_t);
 
 typedef struct tagAUDIODEVICE
 {
    SDL_AudioSpec             spec;		/* Actual-used sound specification */
-   SDL_AudioCVT              cvt;		/* Audio format conversion parameter */
    AUDIOPLAYER              *pMusPlayer;
    AUDIOPLAYER              *pCDPlayer;
 #if PAL_HAS_SDLCD
@@ -46,6 +50,9 @@ typedef struct tagAUDIODEVICE
 #endif
    AUDIOPLAYER              *pSoundPlayer;
    void                     *pSoundBuffer;	/* The output buffer for sound */
+#if SDL_VERSION_ATLEAST(2,0,0)
+   SDL_AudioDeviceID         id;
+#endif
    INT                       iMusicVolume;	/* The BGM volume ranged in [0, 128] for better performance */
    INT                       iSoundVolume;	/* The sound effect volume ranged in [0, 128] for better performance */
    BOOL                      fMusicEnabled; /* Is BGM enabled? */
@@ -54,6 +61,13 @@ typedef struct tagAUDIODEVICE
 } AUDIODEVICE;
 
 static AUDIODEVICE gAudioDevice;
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+# define SDL_CloseAudio() SDL_CloseAudioDevice(gAudioDevice.id)
+# define SDL_PauseAudio(pause_on) SDL_PauseAudioDevice(gAudioDevice.id, (pause_on))
+# define SDL_OpenAudio(desired, obtained) \
+	((gAudioDevice.id = SDL_OpenAudioDevice((gConfig.iAudioDevice >= 0 ? SDL_GetAudioDeviceName(gConfig.iAudioDevice, 0) : NULL), 0, (desired), (obtained), 0)) > 0 ? gAudioDevice.id : -1)
+#endif
 
 PAL_FORCE_INLINE
 void
@@ -120,9 +134,6 @@ AUDIO_FillBuffer(
 {
    memset(stream, 0, len);
 
-   gAudioDevice.cvt.buf = stream;
-   gAudioDevice.cvt.len = len;
-
    //
    // Play music
    //
@@ -168,11 +179,6 @@ AUDIO_FillBuffer(
    // Play sound for AVI
    //
    AVI_FillAudioBuffer(AVI_GetPlayState(), (LPBYTE)stream, len);
-
-   //
-   // Convert audio from native byte-order to actual byte-order
-   //
-   SDL_ConvertAudio(&gAudioDevice.cvt);
 }
 
 INT
@@ -219,17 +225,39 @@ AUDIO_OpenDevice(
    //
    resampler_init();
 
+#if SDL_VERSION_ATLEAST(2,0,0)
+    for( int i = 0; i<SDL_GetNumAudioDrivers();i++)
+    {
+        UTIL_LogOutput(LOGLEVEL_VERBOSE, "Available audio driver %d:%s\n", i, SDL_GetAudioDriver(i));
+    }
+    const char* driver_name = SDL_GetCurrentAudioDriver();
+    if (driver_name) {
+        UTIL_LogOutput(LOGLEVEL_VERBOSE, "Audio subsystem initialized; current driver is %s.\n", driver_name);
+        if(SDL_strncmp(driver_name, "wasapi", 6)==0)
+            gConfig.wAudioBufferSize = PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI;
+    } else {
+        UTIL_LogOutput(LOGLEVEL_VERBOSE, "Audio subsystem not initialized.\n");
+    }
+    for( int i = 0; i<SDL_GetNumAudioDevices(0);i++)
+    {
+        UTIL_LogOutput(LOGLEVEL_VERBOSE, "Available audio device %d:%s\n", i, SDL_GetAudioDeviceName(i,0));
+    }
+    UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio: requesting audio device: %s\n",(gConfig.iAudioDevice >= 0 ? SDL_GetAudioDeviceName(gConfig.iAudioDevice, 0) : "default"));
+    UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio: requesting audio spec:freq %d, format %d, channels %d, samples %d\n", gAudioDevice.spec.freq, gAudioDevice.spec.format,  gAudioDevice.spec.channels, gAudioDevice.spec.samples);
+#endif
+
    //
    // Open the audio device.
    //
    gAudioDevice.spec.freq = gConfig.iSampleRate;
-   gAudioDevice.spec.format = AUDIO_S16;
+   gAudioDevice.spec.format = AUDIO_S16SYS;
    gAudioDevice.spec.channels = gConfig.iAudioChannels;
    gAudioDevice.spec.samples = gConfig.wAudioBufferSize;
    gAudioDevice.spec.callback = AUDIO_FillBuffer;
 
    if (SDL_OpenAudio(&gAudioDevice.spec, &spec) < 0)
    {
+      UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio ERROR: %s, got spec:freq %d, format %d, channels %d, samples %d\n", SDL_GetError(), spec.freq, spec.format, spec.channels,  spec.samples);
       //
       // Failed
       //
@@ -237,11 +265,9 @@ AUDIO_OpenDevice(
    }
    else
    {
-      gAudioDevice.spec = spec;
-      gAudioDevice.pSoundBuffer = malloc(spec.size);
+      UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio succeed\n");
+      gAudioDevice.pSoundBuffer = malloc(gConfig.wAudioBufferSize * gConfig.iAudioChannels * sizeof(short));
    }
-
-   SDL_BuildAudioCVT(&gAudioDevice.cvt, AUDIO_S16SYS, spec.channels, spec.freq, spec.format, spec.channels, spec.freq);
 
    gAudioDevice.fOpened = TRUE;
 
@@ -505,12 +531,12 @@ AUDIO_PlayMusic(
       return;
    }
 
-   SDL_LockAudio();
+   AUDIO_Lock();
    if (gAudioDevice.pMusPlayer)
    {
       gAudioDevice.pMusPlayer->Play(gAudioDevice.pMusPlayer, iNumRIX, fLoop, flFadeTime);
    }
-   SDL_UnlockAudio();
+   AUDIO_Unlock();
 }
 
 BOOL
@@ -554,7 +580,7 @@ AUDIO_PlayCDTrack(
       }
    }
 #endif
-   SDL_LockAudio();
+   AUDIO_Lock();
    if (gAudioDevice.pCDPlayer)
    {
 	   if (iNumTrack != -1)
@@ -566,7 +592,7 @@ AUDIO_PlayCDTrack(
 		   ret = gAudioDevice.pCDPlayer->Play(gAudioDevice.pCDPlayer, -1, FALSE, 0);
 	   }
    }
-   SDL_UnlockAudio();
+   AUDIO_Unlock();
 
    return ret;
 }
@@ -601,6 +627,30 @@ AUDIO_SoundEnabled(
 )
 {
    return gAudioDevice.fSoundEnabled;
+}
+
+void
+AUDIO_Lock(
+	void
+)
+{
+#if SDL_VERSION_ATLEAST(2,0,0)
+	SDL_LockAudioDevice(gAudioDevice.id);
+#else
+	SDL_LockAudio();
+#endif
+}
+
+void
+AUDIO_Unlock(
+	void
+)
+{
+#if SDL_VERSION_ATLEAST(2,0,0)
+	SDL_UnlockAudioDevice(gAudioDevice.id);
+#else
+	SDL_UnlockAudio();
+#endif
 }
 
 #ifdef __vita__

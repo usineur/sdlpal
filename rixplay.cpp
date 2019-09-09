@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -29,10 +29,9 @@
 
 #include "resampler.h"
 #include "adplug/opl.h"
-#include "adplug/demuopl.h"
-#include "adplug/dbemuopl.h"
-#include "adplug/emuopl.h"
+#include "adplug/emuopls.h"
 #include "adplug/surroundopl.h"
+#include "adplug/convertopl.h"
 #include "adplug/rix.h"
 
 typedef struct tagRIXPLAYER :
@@ -107,7 +106,7 @@ RIX_FillBuffer(
 			else
 			{
 				volume = (INT)(SDL_MIX_MAXVOLUME * (1.0 - (double)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples));
-				delta_samples = pRixPlayer->iTotalFadeInSamples / SDL_MIX_MAXVOLUME; vol_delta = 1;
+				delta_samples = (pRixPlayer->iTotalFadeInSamples / SDL_MIX_MAXVOLUME) & ~(gConfig.iAudioChannels - 1); vol_delta = 1;
 			}
 			break;
 		case RIXPLAYER::FADE_OUT:
@@ -150,7 +149,7 @@ RIX_FillBuffer(
 			else
 			{
 				volume = (INT)(SDL_MIX_MAXVOLUME * ((double)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeOutSamples));
-				delta_samples = pRixPlayer->iTotalFadeOutSamples / SDL_MIX_MAXVOLUME; vol_delta = -1;
+				delta_samples = (pRixPlayer->iTotalFadeOutSamples / SDL_MIX_MAXVOLUME) & ~(gConfig.iAudioChannels - 1); vol_delta = -1;
 			}
 			break;
 		default:
@@ -438,48 +437,35 @@ RIX_Init(
 #endif
 	}
 
-	if (gConfig.fUseSurroundOPL)
+	auto chip = (Copl::ChipType)gConfig.eOPLChip;
+	if (chip == Copl::TYPE_OPL2 && gConfig.fUseSurroundOPL)
 	{
-		switch (gConfig.eOPLType)
-		{
-		case OPL_DOSBOX:
-			pRixPlayer->opl = new CSurroundopl(
-				new CDemuopl(gConfig.iOPLSampleRate, true, false),
-				new CDemuopl(gConfig.iOPLSampleRate, true, false),
-				true, gConfig.iOPLSampleRate, gConfig.iSurroundOPLOffset);
-			break;
-		case OPL_DOSBOX_NEW:
-			pRixPlayer->opl = new CSurroundopl(
-				new CDBemuopl(gConfig.iOPLSampleRate, true, false),
-				new CDBemuopl(gConfig.iOPLSampleRate, true, false),
-				true, gConfig.iOPLSampleRate, gConfig.iSurroundOPLOffset);
-			break;
-		case OPL_MAME:
-			pRixPlayer->opl = new CSurroundopl(
-				new CEmuopl(gConfig.iOPLSampleRate, true, false),
-				new CEmuopl(gConfig.iOPLSampleRate, true, false),
-				true, gConfig.iOPLSampleRate, gConfig.iSurroundOPLOffset);
-			break;
-		}
-	}
-	else
-	{
-		switch (gConfig.eOPLType)
-		{
-		case OPL_DOSBOX:
-			pRixPlayer->opl = new CDemuopl(gConfig.iOPLSampleRate, true, gConfig.iAudioChannels == 2);
-			break;
-		case OPL_DOSBOX_NEW:
-			pRixPlayer->opl = new CDBemuopl(gConfig.iOPLSampleRate, true, gConfig.iAudioChannels == 2);
-			break;
-		case OPL_MAME:
-			pRixPlayer->opl = new CEmuopl(gConfig.iOPLSampleRate, true, gConfig.iAudioChannels == 2);
-			break;
-		}
+		chip = Copl::TYPE_DUAL_OPL2;
 	}
 
+	Copl* opl = CEmuopl::CreateEmuopl((OPLCORE::TYPE)gConfig.eOPLCore, chip, gConfig.iOPLSampleRate);
+	if (NULL == opl)
+	{
+		delete pRixPlayer;
+		return NULL;
+	}
+
+	if (gConfig.fUseSurroundOPL)
+	{
+		Copl* tmpopl = new CSurroundopl(gConfig.iOPLSampleRate, gConfig.iSurroundOPLOffset, opl);
+		if (NULL == tmpopl)
+		{
+			delete opl;
+			delete pRixPlayer;
+			return NULL;
+		}
+		opl = tmpopl;
+	}
+
+	pRixPlayer->opl = new CConvertopl(opl, true, gConfig.iAudioChannels == 2);
 	if (pRixPlayer->opl == NULL)
 	{
+		delete opl;
 		delete pRixPlayer;
 		return NULL;
 	}

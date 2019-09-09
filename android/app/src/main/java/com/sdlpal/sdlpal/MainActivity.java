@@ -1,3 +1,25 @@
+/* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
+//
+// Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
+// Copyright (c) 2011-2018, SDLPAL development team.
+// All rights reserved.
+//
+// This file is part of SDLPAL.
+//
+// SDLPAL is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
 package com.sdlpal.sdlpal;
 
 import android.Manifest;
@@ -12,6 +34,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.provider.Settings;
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.*;
 
@@ -105,12 +128,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private boolean traverseDirectory(String path) {
+        File dir = new File(path);
+        boolean iteration = true;
+        if (dir.exists()) {
+            File[] files = dir.listFiles();
+            if (files.length == 0) {
+                return true;
+            } else {
+                for (File file: files) {
+                    iteration = iteration & (file.isDirectory() ? traverseDirectory(file.getAbsolutePath()) : file.exists());
+                }
+            }
+        }
+        return iteration;
+    }
+
     public void StartGame() {
         String dataPath = getApplicationContext().getFilesDir().getPath();
         String cachePath = getApplicationContext().getCacheDir().getPath();
         String sdcardState = Environment.getExternalStorageState();
+        String sdlpalPath = Environment.getExternalStorageDirectory().getPath() + "/sdlpal/";
+
+        // hack; on LOS14.1, everytime after rebooted, native file operation will not work until java code accessed same file once, even permission granted.
+        traverseDirectory(sdlpalPath);
+
+        String extPath = getApplicationContext().getExternalFilesDir(null).getPath();
+		File extFolder = new File(sdlpalPath);
+		if( !extFolder.exists() )
+			extFolder.mkdirs();
+		File forceFile = new File(extPath + "/.force_external_data");
+        Log.v(TAG,"checking redirect file path:"+forceFile.getPath());
+		if( forceFile.exists() ) {
+        	Log.v(TAG,"exist!");
+			dataPath = sdlpalPath;
+			cachePath = sdlpalPath;
+		}else
+        	Log.v(TAG,"not exist!");
         if (sdcardState.equals(Environment.MEDIA_MOUNTED)){
-            setAppPath(Environment.getExternalStorageDirectory().getPath() + "/sdlpal/", dataPath, cachePath);
+            setAppPath(sdlpalPath, dataPath, cachePath);
         } else {
             setAppPath("/sdcard/sdlpal/", dataPath, cachePath);
         }

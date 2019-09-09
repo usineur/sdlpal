@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -97,8 +97,8 @@ PAL_CalcCoverTiles(
    int             x, y, i, l, iTileHeight;
    LPCBITMAPRLE    lpTile;
 
-   const int       sx = PAL_X(gpGlobals->viewport) + PAL_X(lpSpriteToDraw->pos);
-   const int       sy = PAL_Y(gpGlobals->viewport) + PAL_Y(lpSpriteToDraw->pos);
+   const int       sx = PAL_X(gpGlobals->viewport) + PAL_X(lpSpriteToDraw->pos) - lpSpriteToDraw->iLayer/2;
+   const int       sy = PAL_Y(gpGlobals->viewport) + PAL_Y(lpSpriteToDraw->pos) - lpSpriteToDraw->iLayer;
    const int       sh = ((sx % 32) ? 1 : 0);
 
    const int       width = PAL_RLEGetWidth(lpSpriteToDraw->lpSpriteFrame);

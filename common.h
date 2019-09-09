@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -27,6 +27,8 @@
 # define PAL_CLASSIC        1
 #endif
 
+#include "defines.h"
+
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -40,6 +42,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "SDL.h"
 #include "SDL_endian.h"
@@ -174,13 +177,24 @@ typedef const WCHAR        *LPCWSTR;
  */
 #include "pal_config.h"
 
-#if defined(PAL_HAS_GIT_REVISION)
-# undef PAL_GIT_REVISION
-# include "generated.h"
+#if !SDL_VERSION_ATLEAST(2,0,0)
+# if PAL_HAS_GLSL
+#  undef PAL_HAS_GLSL
+# endif
+#define SDL_strcasecmp strcasecmp
+#define SDL_setenv(a,b,c) 
 #endif
 
 #ifndef PAL_DEFAULT_FULLSCREEN_HEIGHT
 # define PAL_DEFAULT_FULLSCREEN_HEIGHT PAL_DEFAULT_WINDOW_HEIGHT
+#endif
+
+#ifndef PAL_DEFAULT_TEXTURE_WIDTH
+# define PAL_DEFAULT_TEXTURE_WIDTH     PAL_DEFAULT_WINDOW_WIDTH
+#endif
+
+#ifndef PAL_DEFAULT_TEXTURE_HEIGHT
+# define PAL_DEFAULT_TEXTURE_HEIGHT    PAL_DEFAULT_WINDOW_HEIGHT
 #endif
 
 /* Default for 1024 samples */
@@ -223,6 +237,14 @@ typedef const WCHAR        *LPCWSTR;
 # define PAL_FATAL_OUTPUT(s)
 #endif
 
+#ifndef PAL_CONVERT_UTF8
+# define PAL_CONVERT_UTF8(s) s
+#endif
+
+#ifndef PAL_NATIVE_PATH_SEPARATOR
+# define PAL_NATIVE_PATH_SEPARATOR "/"
+#endif
+
 #define PAL_fread(buf, elem, num, fp) if (fread((buf), (elem), (num), (fp)) < (num)) return -1
 
 typedef enum tagLOGLEVEL
@@ -263,5 +285,7 @@ typedef enum tagLOGLEVEL
 #ifndef PAL_IS_PATH_SEPARATOR
 # define PAL_IS_PATH_SEPARATOR(x) ((x) == '/')
 #endif
+
+#include "adplug/opltypes.h"
 
 #endif

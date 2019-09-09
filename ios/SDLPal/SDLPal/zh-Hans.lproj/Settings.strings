@@ -59,8 +59,8 @@
 /* Class = "UITableViewSection"; headerTitle = "音频设置"; ObjectID = "kPc-Yq-LOh"; */
 "kPc-Yq-LOh.headerTitle" = "音频设置";
 
-/* Class = "UILabel"; text = "OPL类型"; ObjectID = "lpD-tV-FRw"; */
-"lpD-tV-FRw.text" = "OPL类型";
+/* Class = "UILabel"; text = "OPL核心"; ObjectID = "lpD-tV-FRw"; */
+"lpD-tV-FRw.text" = "OPL核心";
 
 /* Class = "UILabel"; text = "SSRC质量"; ObjectID = "oQa-bR-CM1"; */
 "oQa-bR-CM1.text" = "SSRC质量";
@@ -80,4 +80,9 @@
 /* Class = "UILabel"; text = "SmoothScaling"; ObjectID = "VQA-I8-2Wf"; */
 "VQA-I8-2Wf.text" = "平滑缩放";
 
-"p6J-yg-lGj.text" = "纵横比";
+"XwQ-GI-OlM.headerTitle" = "滤镜";
+"ryw-EG-AOY.text" = "启用GLSL";
+"Pnp-pv-bI9.text" = "启用HDR";
+"xaO-G1-fJo.text" = "纹理宽度";
+"LhH-aH-hZI.text" = "纹理高度";
+"8di-p8-Xhn.text" = "OPL芯片";

@@ -24,9 +24,10 @@ using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 
-static Platform::String^ msg_file_exts[] = { ".msg" };
+static Platform::String^ msg_file_exts[] = { "." PAL_LOCALIZATION_EXT };
 static Platform::String^ font_file_exts[] = { ".bdf" };
 static Platform::String^ log_file_exts[] = { ".log" };
+static Platform::String^ shader_file_exts[] = {  ".glslp", ".glsl" };
 
 MainPage^ MainPage::Current = nullptr;
 
@@ -40,15 +41,18 @@ MainPage::MainPage()
 	m_controls->Insert(btnBrowseMsgFile->Name, ref new ButtonAttribute(tbMsgFile, ref new Platform::Array<Platform::String^>(msg_file_exts, sizeof(msg_file_exts) / sizeof(msg_file_exts[0]))));
 	m_controls->Insert(btnBrowseFontFile->Name, ref new ButtonAttribute(tbFontFile, ref new Platform::Array<Platform::String^>(font_file_exts, sizeof(font_file_exts) / sizeof(font_file_exts[0]))));
 	m_controls->Insert(btnBrowseLogFile->Name, ref new ButtonAttribute(tbLogFile, ref new Platform::Array<Platform::String^>(log_file_exts, sizeof(log_file_exts) / sizeof(log_file_exts[0]))));
+	m_controls->Insert(btnBrowseShaderFile->Name, ref new ButtonAttribute(tbShaderFile, ref new Platform::Array<Platform::String^>(shader_file_exts, sizeof(shader_file_exts) / sizeof(shader_file_exts[0]))));
 	m_controls->Insert(cbUseMsgFile->Name, ref new ButtonAttribute(gridMsgFile, nullptr));
 	m_controls->Insert(cbUseFontFile->Name, ref new ButtonAttribute(gridFontFile, nullptr));
 	m_controls->Insert(cbUseLogFile->Name, ref new ButtonAttribute(gridLogFile, nullptr));
+	m_controls->Insert(cbEnableGLSL->Name, ref new ButtonAttribute(gridGLSL, nullptr));
 
 	m_acl[PALCFG_GAMEPATH] = ref new AccessListEntry(tbGamePath, nullptr, ConvertString(PAL_ConfigName(PALCFG_GAMEPATH)));
 	m_acl[PALCFG_SAVEPATH] = ref new AccessListEntry(tbGamePath, nullptr, ConvertString(PAL_ConfigName(PALCFG_SAVEPATH)));
 	m_acl[PALCFG_MESSAGEFILE] = ref new AccessListEntry(tbMsgFile, cbUseMsgFile, ConvertString(PAL_ConfigName(PALCFG_MESSAGEFILE)));
 	m_acl[PALCFG_FONTFILE] = ref new AccessListEntry(tbFontFile, cbUseFontFile, ConvertString(PAL_ConfigName(PALCFG_FONTFILE)));
 	m_acl[PALCFG_LOGFILE] = ref new AccessListEntry(tbLogFile, cbUseLogFile, ConvertString(PAL_ConfigName(PALCFG_LOGFILE)));
+	m_acl[PALCFG_SHADER] = ref new AccessListEntry(tbShaderFile, cbEnableGLSL, ConvertString(PAL_ConfigName(PALCFG_SHADER)));
 
 	tbGitRevision->Text = "  " PAL_GIT_REVISION;
 
@@ -103,6 +107,7 @@ void SDLPal::MainPage::LoadControlContents(bool loadDefault)
 	tsSurroundOPL->IsOn = (gConfig.fUseSurroundOPL == TRUE);
 	tsTouchOverlay->IsOn = (gConfig.fUseTouchOverlay == TRUE);
 	tsEnableAVI->IsOn = (gConfig.fEnableAviPlay == TRUE);
+	tsEnableHDR->IsOn = (gConfig.fEnableHDR == TRUE);
 
 	slMusicVolume->Value = gConfig.iMusicVolume;
 	slSoundVolume->Value = gConfig.iSoundVolume;
@@ -111,8 +116,15 @@ void SDLPal::MainPage::LoadControlContents(bool loadDefault)
 
 	cbCD->SelectedIndex = (gConfig.eCDType == MUSIC_MP3) ? 0 : 1;
 	cbBGM->SelectedIndex = (gConfig.eMusicType <= MUSIC_OGG) ? gConfig.eMusicType : MUSIC_RIX;
-	cbOPL->SelectedIndex = (int)gConfig.eOPLType;
-	cbAspectRatio->SelectedIndex = gConfig.dwAspectY == 0 ? 0 : [](std::vector<float> &array, float toMatch) {return std::find_if(array.begin(), array.end(), [toMatch](float i)->bool { return fabs(toMatch - i) < FLT_EPSILON; }) - array.begin(); }(std::vector<float>({ 16.0f / 10.0f, 4.0f / 3.0f }), (float)gConfig.dwAspectX / gConfig.dwAspectY);
+	cbOPLCore->SelectedIndex = (int)gConfig.eOPLCore;
+	cbOPLChip->SelectedIndex = (int)gConfig.eOPLChip;
+	cbEnableGLSL->IsChecked = gConfig.fEnableGLSL == TRUE;
+
+	tbShaderFile->Text = ConvertString(gConfig.pszShader);
+	tbWindowWidth->Text = ConvertString(std::to_string(gConfig.dwScreenWidth));
+	tbWindowHeight->Text = ConvertString(std::to_string(gConfig.dwScreenHeight));
+	tbTextureWidth->Text = ConvertString(std::to_string(gConfig.dwTextureWidth));
+	tbTextureHeight->Text = ConvertString(std::to_string(gConfig.dwTextureHeight));
 
 	if (gConfig.iSampleRate <= 11025)
 		cbSampleRate->SelectedIndex = 0;
@@ -150,22 +162,22 @@ void SDLPal::MainPage::SaveControlContents()
 	gConfig.fUseSurroundOPL = tsSurroundOPL->IsOn ? TRUE : FALSE;
 	gConfig.fUseTouchOverlay = tsTouchOverlay->IsOn ? TRUE : FALSE;
 	gConfig.fEnableAviPlay = tsEnableAVI->IsOn ? TRUE : FALSE;
+	gConfig.fEnableGLSL = cbEnableGLSL->IsChecked->Value ? TRUE : FALSE;
+	gConfig.fEnableHDR = tsEnableHDR->IsOn ? TRUE : FALSE;
 
 	gConfig.iMusicVolume = (int)slMusicVolume->Value;
 	gConfig.iSoundVolume = (int)slSoundVolume->Value;
 	gConfig.iResampleQuality = (int)slQuality->Value;
 	gConfig.iLogLevel = (LOGLEVEL)cbLogLevel->SelectedIndex;
+	gConfig.dwScreenWidth = _wtoi(tbWindowWidth->Text->Data());
+	gConfig.dwScreenHeight = _wtoi(tbWindowHeight->Text->Data());
+	gConfig.dwTextureWidth = _wtoi(tbTextureWidth->Text->Data());
+	gConfig.dwTextureHeight = _wtoi(tbTextureHeight->Text->Data());
 
 	gConfig.eCDType = (MUSICTYPE)(MUSIC_MP3 + cbCD->SelectedIndex);
 	gConfig.eMusicType = (MUSICTYPE)cbBGM->SelectedIndex;
-	gConfig.eOPLType = (OPLTYPE)cbOPL->SelectedIndex;
-
-	wchar_t *lasts;
-	wchar_t *selectedAspectRatio = (wchar_t*)static_cast<Platform::String^>(static_cast<ComboBoxItem^>(cbAspectRatio->SelectedItem)->Content)->Data();
-	wchar_t *w=wcstok_s(selectedAspectRatio, L":", &lasts);
-	gConfig.dwAspectX = _wtoi(w);
-	w = wcstok_s(NULL, L":", &lasts);
-	gConfig.dwAspectY = _wtoi(w);
+	gConfig.eOPLCore = (OPLCORE_TYPE)cbOPLCore->SelectedIndex;
+	gConfig.eOPLChip = gConfig.eOPLCore == OPLCORE_NUKED ? OPLCHIP_OPL3 : (OPLCHIP_TYPE)cbOPLChip->SelectedIndex;
 
 	gConfig.iSampleRate = wcstoul(static_cast<Platform::String^>(static_cast<ComboBoxItem^>(cbSampleRate->SelectedItem)->Content)->Data(), nullptr, 10);
 	gConfig.iOPLSampleRate = wcstoul(static_cast<Platform::String^>(static_cast<ComboBoxItem^>(cbOPLSR->SelectedItem)->Content)->Data(), nullptr, 10);
@@ -175,7 +187,8 @@ void SDLPal::MainPage::SaveControlContents()
 void SDLPal::MainPage::cbBGM_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
 {
 	auto visibility = (cbBGM->SelectedIndex == MUSIC_RIX) ? Windows::UI::Xaml::Visibility::Visible : Windows::UI::Xaml::Visibility::Collapsed;
-	cbOPL->Visibility = visibility;
+	cbOPLCore->Visibility = visibility;
+	cbOPLChip->Visibility = visibility;
 	cbOPLSR->Visibility = visibility;
 	tsSurroundOPL->Visibility = visibility;
 }
@@ -306,8 +319,15 @@ void SDLPal::MainPage::Page_Loaded(Platform::Object^ sender, Windows::UI::Xaml::
 #if NTDDI_VERSION >= NTDDI_WIN10
 	if (!Windows::Foundation::Metadata::ApiInformation::IsTypePresent("Windows.UI.ViewManagement.StatusBar")) return;
 #endif
-#if NTDDI_VERSION >= NTDDI_WIN10 || WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
 	auto statusBar = Windows::UI::ViewManagement::StatusBar::GetForCurrentView();
 	concurrency::create_task(statusBar->ShowAsync()).then([statusBar]() { statusBar->BackgroundOpacity = 1.0; });
 #endif
+}
+
+void SDLPal::MainPage::cbEnableGLSL_CheckChanged(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	auto checker = static_cast<Windows::UI::Xaml::Controls::CheckBox^>(sender);
+	auto attr = m_controls->Lookup(checker->Name);
+	attr->Object->Visibility = checker->IsChecked->Value ? Windows::UI::Xaml::Visibility::Visible : Windows::UI::Xaml::Visibility::Collapsed;
 }

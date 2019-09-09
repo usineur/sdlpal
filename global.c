@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -929,6 +929,69 @@ PAL_InitGameData(
    PAL_UpdateEquipments();
 }
 
+INT
+PAL_CountItem(
+   WORD          wObjectID
+)
+/*++
+ Purpose:
+ 
+ Count the specified kind of item in the inventory AND in players' equipments.
+ 
+ Parameters:
+ 
+ [IN]  wObjectID - object number of the item.
+ 
+ Return value:
+ 
+ Counted value.
+ 
+ --*/
+{
+    int          index;
+    int          count;
+    int          i,j,w;
+
+    if (wObjectID == 0)
+    {
+        return FALSE;
+    }
+    
+    index = 0;
+    count = 0;
+    
+    //
+    // Search for the specified item in the inventory
+    //
+    while (index < MAX_INVENTORY)
+    {
+        if (gpGlobals->rgInventory[index].wItem == wObjectID)
+        {
+            count = gpGlobals->rgInventory[index].nAmount;
+            break;
+        }
+        else if (gpGlobals->rgInventory[index].wItem == 0)
+        {
+            break;
+        }
+        index++;
+    }
+    
+    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
+    {
+        w = gpGlobals->rgParty[i].wPlayerRole;
+        
+        for (j = 0; j < MAX_PLAYER_EQUIPMENTS; j++)
+        {
+            if (gpGlobals->g.PlayerRoles.rgwEquipment[j][w] == wObjectID)
+            {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
 BOOL
 PAL_AddItemToInventory(
    WORD          wObjectID,
@@ -1112,10 +1175,7 @@ PAL_CompressInventory(
 
    for (i = 0; i < MAX_INVENTORY; i++)
    {
-      if (gpGlobals->rgInventory[i].wItem == 0)
-      {
-         break;
-      }
+      //removed detect zero then break code, due to incompatible with save file hacked by palmod
 
       if (gpGlobals->rgInventory[i].nAmount > 0)
       {
@@ -1160,6 +1220,8 @@ PAL_IncreaseHPMP(
 --*/
 {
    BOOL           fSuccess = FALSE;
+   WORD           wOrigHP = gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole];
+   WORD           wOrigMP = gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole];
 
    //
    // Only care about alive players
@@ -1198,7 +1260,12 @@ PAL_IncreaseHPMP(
             gpGlobals->g.PlayerRoles.rgwMaxMP[wPlayerRole];
       }
 
-      fSuccess = TRUE;
+      //
+      // Avoid over treatment
+      //
+      if (wOrigHP != gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] ||
+          wOrigMP != gpGlobals->g.PlayerRoles.rgwMP[wPlayerRole])
+         fSuccess = TRUE;
    }
 
    return fSuccess;
@@ -1387,7 +1454,7 @@ PAL_AddPoisonForPlayer(
    {
       gpGlobals->rgPoisonStatus[i][index].wPoisonID = wPoisonID;
       gpGlobals->rgPoisonStatus[i][index].wPoisonScript =
-         gpGlobals->g.rgObject[wPoisonID].poison.wPlayerScript;
+		  PAL_RunTriggerScript(gpGlobals->g.rgObject[wPoisonID].poison.wPlayerScript, wPlayerRole);
    }
 }
 
@@ -2095,8 +2162,7 @@ PAL_SetPlayerStatus(
       //
       // for "bad" statuses, don't set the status when we already have it
       //
-      if (gpGlobals->g.PlayerRoles.rgwHP[wPlayerRole] != 0 &&
-         gpGlobals->rgPlayerStatus[wPlayerRole][wStatusID] == 0)
+      if (gpGlobals->rgPlayerStatus[wPlayerRole][wStatusID] == 0)
       {
          gpGlobals->rgPlayerStatus[wPlayerRole][wStatusID] = wNumRound;
       }

@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -101,8 +101,8 @@ typedef struct tagBATTLEUI
 
    WORD             wCurPlayerIndex;      // index of the current player
    WORD             wSelectedAction;      // current selected action
-   WORD             wSelectedIndex;       // current selected index of player or enemy
-   WORD             wPrevEnemyTarget;     // previous enemy target
+   INT              iSelectedIndex;       // current selected index of player or enemy
+   INT              iPrevEnemyTarget;     // previous enemy target
 
    WORD             wActionType;          // type of action to be performed
    WORD             wObjectID;            // object ID of the item or magic to use

@@ -1,3 +1,25 @@
+/* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
+//
+// Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
+// Copyright (c) 2011-2018, SDLPAL development team.
+// All rights reserved.
+//
+// This file is part of SDLPAL.
+//
+// SDLPAL is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
 package com.sdlpal.sdlpal;
 
 import android.app.Activity;
@@ -7,6 +29,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
@@ -42,7 +65,6 @@ public class SettingsActivity extends AppCompatActivity {
     public static native boolean isDirWritable(String path);
 
     private static final String KeepAspectRatio = "KeepAspectRatio";
-    private static final String AspectRatio = "AspectRatio";
     private static final String LaunchSetting = "LaunchSetting";
     private static final String Stereo = "Stereo";
     private static final String UseSurroundOPL = "UseSurroundOPL";
@@ -62,14 +84,21 @@ public class SettingsActivity extends AppCompatActivity {
     private static final String LogFileName = "LogFileName";
     private static final String FontFileName = "FontFileName";
     private static final String MusicFormat = "Music";
-    private static final String OPLFormat = "OPL";
+    private static final String OPLCore = "OPLCore";
+    private static final String OPLChip = "OPLChip";
+    private static final String EnableGLSL = "EnableGLSL";
+    private static final String EnableHDR = "EnableHDR";
+    private static final String Shader = "Shader";
+    private static final String TextureWidth = "TextureWidth";
+    private static final String TextureHeight = "TextureHeight";
 
     private static final int AudioSampleRates[] = { 11025, 22050, 44100 };
     private static final int AudioBufferSizes[] = { 512, 1024, 2048, 4096, 8192 };
     private static final int OPLSampleRates[] = { 11025, 12429, 22050, 24858, 44100, 49716 };
     private static final String CDFormats[] = { "MP3", "OGG" };
     private static final String MusicFormats[] = { "MIDI", "RIX", "MP3", "OGG" };
-    private static final String OPLFormats[] = { "DOSBOX", "MAME", "DOSBOXNEW" };
+    private static final String OPLCores[] = { "MAME", "DBFLT", "DBINT", "NUKED" };
+    private static final String OPLChips[] = { "OPL2", "OPL3" };
     private static final String AspectRatios[] = { "16:10", "4:3" };
 
     private SettingsActivity mInstance = this;
@@ -77,6 +106,7 @@ public class SettingsActivity extends AppCompatActivity {
     private static final int BROWSE_GAMEDIR_CODE = 30001;
     private static final int BROWSE_MSGFILE_CODE = 30002;
     private static final int BROWSE_FONTFILE_CODE = 30003;
+    private static final int BROWSE_SHADER_CODE = 30004;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +136,13 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 findViewById(R.id.edLogFile).setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            }
+        });
+
+        ((SwitchCompat)findViewById(R.id.swEnableGLSL)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                findViewById(R.id.glslBlock).setVisibility(isChecked ? View.VISIBLE : View.GONE);
             }
         });
 
@@ -140,7 +177,8 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String gamePath = ((EditText)findViewById(R.id.edFolder)).getText().toString();
                 String msgFile = ((EditText)findViewById(R.id.edMsgFile)).getText().toString();
-                if (!checkResourceFiles(gamePath, msgFile)) {
+                File fileMsg =new File(msgFile);
+                if (!checkResourceFiles(gamePath, fileMsg.getName())) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(mInstance);
                     builder.setMessage(getString(R.string.msg_data_not_found_header) + "\n" +
                             gamePath + "\n\n" +
@@ -211,6 +249,19 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.btnBrowseShader).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(mInstance, FilePickerActivity.class);
+                i.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
+                i.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, true);
+                i.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE);
+                i.putExtra(FilePickerActivity.EXTRA_START_PATH, ((EditText)findViewById(R.id.edFolder)).getText().toString());
+
+                startActivityForResult(i, BROWSE_SHADER_CODE);
+            }
+        });
+
         resetConfigs();
 
         if (PalActivity.crashed) {
@@ -248,6 +299,8 @@ public class SettingsActivity extends AppCompatActivity {
                     ((EditText) findViewById(R.id.edMsgFile)).setText(filePath);
                 } else if (requestCode == BROWSE_FONTFILE_CODE) {
                     ((EditText) findViewById(R.id.edFontFile)).setText(filePath);
+                } else if (requestCode == BROWSE_SHADER_CODE) {
+                    ((EditText) findViewById(R.id.edShader)).setText(filePath);
                 }
             }
         }
@@ -278,6 +331,7 @@ public class SettingsActivity extends AppCompatActivity {
         findViewById(R.id.btnBrowseFontFile).setVisibility(View.GONE);
         findViewById(R.id.edLogFile).setVisibility(View.GONE);
         findViewById(R.id.layoutOPL).setVisibility(View.VISIBLE);
+        findViewById(R.id.glslBlock).setVisibility(View.GONE);
 
         ((SeekBar)findViewById(R.id.sbMusVol)).setProgress(getConfigInt(MusicVolume, true));
         ((SeekBar)findViewById(R.id.sbSFXVol)).setProgress(getConfigInt(SoundVolume, true));
@@ -306,9 +360,9 @@ public class SettingsActivity extends AppCompatActivity {
         ((AppCompatSpinner)findViewById(R.id.spBuffer)).setSelection(findMatchedIntIndex(getConfigInt(AudioBufferSize, true), AudioBufferSizes, 1));    // 1024
         ((AppCompatSpinner)findViewById(R.id.spCDFmt)).setSelection(findMatchedStringIndex(getConfigString(CDFormat, true), CDFormats, 1));     // OGG
         ((AppCompatSpinner)findViewById(R.id.spMusFmt)).setSelection(findMatchedStringIndex(getConfigString(MusicFormat, true), MusicFormats, 1));    // RIX
-        ((AppCompatSpinner)findViewById(R.id.spOPL)).setSelection(findMatchedStringIndex(getConfigString(OPLFormat, true), OPLFormats, 1));       // MAME
+        ((AppCompatSpinner)findViewById(R.id.spOPLCore)).setSelection(findMatchedStringIndex(getConfigString(OPLCore, true), OPLCores, 1));       // DBFLT
+        ((AppCompatSpinner)findViewById(R.id.spOPLChip)).setSelection(findMatchedStringIndex(getConfigString(OPLChip, true), OPLChips, 0));       // OPL2
         ((AppCompatSpinner)findViewById(R.id.spOPLRate)).setSelection(findMatchedIntIndex(getConfigInt(OPLSampleRate, true), OPLSampleRates, 5));  // 49716Hz
-        ((AppCompatSpinner)findViewById(R.id.spAspectRatio)).setSelection(findMatchedStringIndex(getConfigString(AspectRatio, true), AspectRatios, 0));  // 16:10
     }
 
 
@@ -319,16 +373,20 @@ public class SettingsActivity extends AppCompatActivity {
         findViewById(R.id.btnBrowseFontFile).setVisibility(View.GONE);
         findViewById(R.id.edLogFile).setVisibility(View.GONE);
         findViewById(R.id.layoutOPL).setVisibility(View.VISIBLE);
+        findViewById(R.id.glslBlock).setVisibility(View.GONE);
 
         ((SeekBar)findViewById(R.id.sbMusVol)).setProgress(getConfigInt(MusicVolume, false));
         ((SeekBar)findViewById(R.id.sbSFXVol)).setProgress(getConfigInt(SoundVolume, false));
         ((SeekBar)findViewById(R.id.sbQuality)).setProgress(getConfigInt(ResampleQuality, false)); // Best quality
 
-        String msgFile, fontFile, logFile;
+        String msgFile, fontFile, logFile, shader, textureWidth, textureHeight;
         ((EditText)findViewById(R.id.edFolder)).setText(getConfigString(GamePath, false));
         ((EditText)findViewById(R.id.edMsgFile)).setText(msgFile = getConfigString(MessageFileName, false));
         ((EditText)findViewById(R.id.edFontFile)).setText(fontFile = getConfigString(FontFileName, false));
         ((EditText)findViewById(R.id.edLogFile)).setText(logFile = getConfigString(LogFileName, false));
+        ((EditText)findViewById(R.id.edShader)).setText(shader = getConfigString(Shader, false));
+        ((EditText)findViewById(R.id.edTextureWidth)).setText(textureWidth = String.valueOf(getConfigInt(TextureWidth, false)));
+        ((EditText)findViewById(R.id.edTextureHeight)).setText(textureHeight = String.valueOf(getConfigInt(TextureHeight, false)));
 
         ((SwitchCompat)findViewById(R.id.swMsgFile)).setChecked(msgFile != null && !msgFile.isEmpty());
         ((SwitchCompat)findViewById(R.id.swFontFile)).setChecked(fontFile != null && !fontFile.isEmpty());
@@ -338,15 +396,21 @@ public class SettingsActivity extends AppCompatActivity {
         ((SwitchCompat)findViewById(R.id.swAspect)).setChecked(getConfigBoolean(KeepAspectRatio, false));
         ((SwitchCompat)findViewById(R.id.swSurround)).setChecked(getConfigBoolean(UseSurroundOPL, false));
         ((SwitchCompat)findViewById(R.id.swStereo)).setChecked(getConfigBoolean(Stereo, false));
+        ((SwitchCompat)findViewById(R.id.swEnableGLSL)).setChecked(getConfigBoolean(EnableGLSL, false));
+        ((SwitchCompat)findViewById(R.id.swEnableHDR)).setChecked(getConfigBoolean(EnableHDR, false));
 
         ((AppCompatSpinner)findViewById(R.id.spLogLevel)).setSelection(getConfigInt(LogLevel, false));
-        ((AppCompatSpinner)findViewById(R.id.spSample)).setSelection(findMatchedIntIndex(getConfigInt(SampleRate, false), AudioSampleRates, 2));    // 44100Hz
-        ((AppCompatSpinner)findViewById(R.id.spBuffer)).setSelection(findMatchedIntIndex(getConfigInt(AudioBufferSize, false), AudioBufferSizes, 1));    // 1024
-        ((AppCompatSpinner)findViewById(R.id.spCDFmt)).setSelection(findMatchedStringIndex(getConfigString(CDFormat, false), CDFormats, 1));     // OGG
-        ((AppCompatSpinner)findViewById(R.id.spMusFmt)).setSelection(findMatchedStringIndex(getConfigString(MusicFormat, false), MusicFormats, 1));    // RIX
-        ((AppCompatSpinner)findViewById(R.id.spOPL)).setSelection(findMatchedStringIndex(getConfigString(OPLFormat, false), OPLFormats, 1));       // MAME
-        ((AppCompatSpinner)findViewById(R.id.spOPLRate)).setSelection(findMatchedIntIndex(getConfigInt(OPLSampleRate, false), OPLSampleRates, 5));  // 49716Hz
-        ((AppCompatSpinner)findViewById(R.id.spAspectRatio)).setSelection(findMatchedStringIndex(getConfigString(AspectRatio, false), AspectRatios, 0));  // 16:10
+        ((AppCompatSpinner)findViewById(R.id.spSample)).setSelection(findMatchedIntIndex(getConfigInt(SampleRate, false), AudioSampleRates, 2));
+        ((AppCompatSpinner)findViewById(R.id.spBuffer)).setSelection(findMatchedIntIndex(getConfigInt(AudioBufferSize, false), AudioBufferSizes, 1));
+        ((AppCompatSpinner)findViewById(R.id.spCDFmt)).setSelection(findMatchedStringIndex(getConfigString(CDFormat, false), CDFormats, 1));
+        ((AppCompatSpinner)findViewById(R.id.spMusFmt)).setSelection(findMatchedStringIndex(getConfigString(MusicFormat, false), MusicFormats, 1));
+        ((AppCompatSpinner)findViewById(R.id.spOPLCore)).setSelection(findMatchedStringIndex(getConfigString(OPLCore, false), OPLCores, 1));
+        if (((AppCompatSpinner)findViewById(R.id.spOPLCore)).getSelectedItemId() == 3) {
+            ((AppCompatSpinner)findViewById(R.id.spOPLChip)).setSelection(1);       // OPL3
+        } else {
+            ((AppCompatSpinner)findViewById(R.id.spOPLChip)).setSelection(findMatchedStringIndex(getConfigString(OPLChip, false), OPLChips, 0));
+        }
+        ((AppCompatSpinner)findViewById(R.id.spOPLRate)).setSelection(findMatchedIntIndex(getConfigInt(OPLSampleRate, false), OPLSampleRates, 5));
     }
 
     protected boolean setConfigs() {
@@ -382,20 +446,29 @@ public class SettingsActivity extends AppCompatActivity {
         setConfigString(MessageFileName, ((SwitchCompat)findViewById(R.id.swMsgFile)).isChecked() ? ((EditText)findViewById(R.id.edMsgFile)).getText().toString() : null);
         setConfigString(FontFileName, ((SwitchCompat)findViewById(R.id.swFontFile)).isChecked() ? ((EditText)findViewById(R.id.edFontFile)).getText().toString() : null);
         setConfigString(LogFileName, ((SwitchCompat)findViewById(R.id.swLogFile)).isChecked() ? ((EditText)findViewById(R.id.edLogFile)).getText().toString() : null);
+        setConfigString(Shader, ((EditText)findViewById(R.id.edShader)).getText().toString());
 
         setConfigBoolean(UseTouchOverlay, ((SwitchCompat)findViewById(R.id.swTouch)).isChecked());
         setConfigBoolean(KeepAspectRatio, ((SwitchCompat)findViewById(R.id.swAspect)).isChecked());
         setConfigBoolean(UseSurroundOPL, ((SwitchCompat)findViewById(R.id.swSurround)).isChecked());
         setConfigBoolean(Stereo, ((SwitchCompat)findViewById(R.id.swStereo)).isChecked());
+        setConfigBoolean(EnableGLSL, ((SwitchCompat)findViewById(R.id.swEnableGLSL)).isChecked());
+        setConfigBoolean(EnableHDR, ((SwitchCompat)findViewById(R.id.swEnableHDR)).isChecked());
 
         setConfigInt(LogLevel, ((AppCompatSpinner)findViewById(R.id.spLogLevel)).getSelectedItemPosition());
         setConfigInt(SampleRate, Integer.parseInt((String)((AppCompatSpinner)findViewById(R.id.spSample)).getSelectedItem()));
         setConfigInt(AudioBufferSize, Integer.parseInt((String)((AppCompatSpinner)findViewById(R.id.spBuffer)).getSelectedItem()));
         setConfigString(CDFormat, (String)((AppCompatSpinner)findViewById(R.id.spCDFmt)).getSelectedItem());
         setConfigString(MusicFormat, (String)((AppCompatSpinner)findViewById(R.id.spMusFmt)).getSelectedItem());
-        setConfigString(OPLFormat, (String)((AppCompatSpinner)findViewById(R.id.spOPL)).getSelectedItem());
+        setConfigString(OPLCore, (String)((AppCompatSpinner)findViewById(R.id.spOPLCore)).getSelectedItem());
+        if (((AppCompatSpinner)findViewById(R.id.spOPLCore)).getSelectedItemId() == 3) {
+            setConfigString(OPLChip, OPLChips[1]);
+        } else {
+            setConfigString(OPLChip, (String) ((AppCompatSpinner) findViewById(R.id.spOPLChip)).getSelectedItem());
+        }
         setConfigInt(OPLSampleRate, Integer.parseInt((String)((AppCompatSpinner)findViewById(R.id.spOPLRate)).getSelectedItem()));
-        setConfigString(AspectRatio, (String)((AppCompatSpinner)findViewById(R.id.spAspectRatio)).getSelectedItem());
+        setConfigInt(TextureWidth, Integer.parseInt((String)((EditText)findViewById(R.id.edTextureWidth)).getText().toString()));
+        setConfigInt(TextureHeight, Integer.parseInt((String)((EditText)findViewById(R.id.edTextureHeight)).getText().toString()));
 
         return true;
     }

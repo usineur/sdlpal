@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -48,7 +48,12 @@ typedef struct tagTEXTLIB
 {
     LPWSTR         *lpWordBuf;
     LPWSTR         *lpMsgBuf;
-    int           **lpIndexBuf;
+    int           ***lpIndexBuf; 
+	
+	int            *indexMaxCounter;
+	// The variable indexMaxCounter stores the value of (item->indexEnd - item->index), 
+	// which means the span between eid and sid. 
+		
     BOOL            fUseISOFont;
 	int             iFontFlavor;
 
@@ -64,6 +69,7 @@ typedef struct tagTEXTLIB
     BYTE            bDialogPosition;
     BYTE            bIcon;
     int             iDelayTime;
+    INT             iDialogShadow;
     BOOL            fUserSkip;
     BOOL            fPlayingRNG;
 
@@ -97,7 +103,13 @@ PAL_GetMsg(
 int
 PAL_GetMsgNum(
    int        iIndex,
+   int        iSpan,
    int        iOrder
+);
+
+LPWSTR
+PAL_UnescapeText(
+   LPCWSTR    lpszText
 );
 
 VOID
@@ -111,6 +123,17 @@ PAL_DrawText(
 );
 
 VOID
+PAL_DrawTextUnescape(
+   LPCWSTR    lpszText,
+   PAL_POS    pos,
+   BYTE       bColor,
+   BOOL       fShadow,
+   BOOL       fUpdate,
+   BOOL       fUse8x8Font,
+   BOOL       fUnescape
+);
+
+VOID
 PAL_DialogSetDelayTime(
    INT          iDelayTime
 );
@@ -121,6 +144,24 @@ PAL_StartDialog(
    BYTE         bFontColor,
    INT          iNumCharFace,
    BOOL         fPlayingRNG
+);
+
+VOID
+PAL_StartDialogWithOffset(
+   BYTE         bDialogLocation,
+   BYTE         bFontColor,
+   INT          iNumCharFace,
+   BOOL         fPlayingRNG,
+   INT          xOff,
+   INT          yOff
+);
+
+int
+TEXT_DisplayText(
+   LPCWSTR        lpszText,
+   int            x,
+   int            y,
+   BOOL           isDialog
 );
 
 VOID

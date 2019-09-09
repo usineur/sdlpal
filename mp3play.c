@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -115,7 +115,7 @@ MP3_Play(
 
 	if (iNum > 0)
 	{
-		player->pMP3 = mad_openFile(UTIL_GetFullPathName(PAL_BUFFER_SIZE_ARGS(0), gConfig.pszGamePath, PAL_va(1, "mp3/%.2d.mp3", iNum)), AUDIO_GetDeviceSpec(), gConfig.iResampleQuality);
+		player->pMP3 = mad_openFile(UTIL_GetFullPathName(PAL_BUFFER_SIZE_ARGS(0), gConfig.pszGamePath, PAL_va(1, "mp3%s%.2d.mp3", PAL_NATIVE_PATH_SEPARATOR, iNum)), AUDIO_GetDeviceSpec(), gConfig.iResampleQuality);
 
 		if (player->pMP3)
 		{

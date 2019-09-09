@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -397,15 +397,14 @@ PAL_RNGPlay(
 
 --*/
 {
-   int             iDelay = 800 / (iSpeed == 0 ? 16 : iSpeed);
+   double         iDelay = (double)SDL_GetPerformanceFrequency() / (iSpeed == 0 ? 16 : iSpeed);
    uint8_t        *rng = (uint8_t *)malloc(65000);
    uint8_t        *buf = (uint8_t *)malloc(65000);
    FILE           *fp = UTIL_OpenRequiredFile("rng.mkf");
 
-   for (; rng && buf && iStartFrame <= iEndFrame; iStartFrame++)
+   for (double iTime = SDL_GetPerformanceCounter(); rng && buf && iStartFrame != iEndFrame; iStartFrame++)
    {
-      uint32_t iTime = SDL_GetTicks() + iDelay;
-
+	  iTime += iDelay;
       //
       // Read, decompress and render the frame
       //
@@ -435,7 +434,7 @@ PAL_RNGPlay(
       //
       // Delay for a while
       //
-      PAL_DelayUntil(iTime);
+	  PAL_DelayUntilPC(iTime);
    }
 
    fclose(fp);

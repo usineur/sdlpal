@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -46,6 +46,8 @@ typedef enum tagPALCFG_ITEM
 	PALCFG_ENABLEKEYREPEAT,
 	PALCFG_USETOUCHOVERLAY,
 	PALCFG_ENABLEAVIPLAY,
+    PALCFG_ENABLEGLSL,
+    PALCFG_ENABLEHDR,
 	/* Booleans */
 	PALCFG_BOOLEAN_MAX,
 
@@ -53,6 +55,7 @@ typedef enum tagPALCFG_ITEM
 	/* Integers */
 	PALCFG_SURROUNDOPLOFFSET = PALCFG_INTEGER_MIN,
 	PALCFG_LOGLEVEL,
+	PALCFG_AUDIODEVICE,
 	/* Integers */
 	PALCFG_INTEGER_MAX,
 
@@ -66,6 +69,8 @@ typedef enum tagPALCFG_ITEM
 	PALCFG_SOUNDVOLUME,
 	PALCFG_WINDOWHEIGHT,
 	PALCFG_WINDOWWIDTH,
+    PALCFG_TEXTUREHEIGHT,
+    PALCFG_TEXTUREWIDTH,
 	/* Unsigneds */
 	PALCFG_UNSIGNED_MAX,
 
@@ -73,16 +78,18 @@ typedef enum tagPALCFG_ITEM
 	/* Strings */
 	PALCFG_CD = PALCFG_STRING_MIN,
 	PALCFG_GAMEPATH,
-	PALCFG_SAVEPATH,
+    PALCFG_SAVEPATH,
+    PALCFG_SHADERPATH,
 	PALCFG_MESSAGEFILE,
 	PALCFG_FONTFILE,
 	PALCFG_MUSIC,
-	PALCFG_OPL,
+	PALCFG_OPL_CORE,
+	PALCFG_OPL_CHIP,
 	PALCFG_LOGFILE,
 	PALCFG_RIXEXTRAINIT,
 	PALCFG_MIDICLIENT,
-    PALCFG_SCALEQUALITY,
-    PALCFG_ASPECTRATIO,
+	PALCFG_SCALEQUALITY,
+	PALCFG_SHADER,
 	/* Strings */
 	PALCFG_STRING_MAX,
 
@@ -167,16 +174,19 @@ typedef struct tagCONFIGURATION
 	/* Configurable options */
 	char            *pszGamePath;
 	char            *pszSavePath;
+    char            *pszShaderPath;
 	char            *pszMsgFile;
 	char            *pszFontFile;
 	char            *pszMIDIClient;
 	char            *pszLogFile;
-    char            *pszScaleQuality;
+	char            *pszScaleQuality;
+	char            *pszShader;
 	DWORD            dwWordLength;
 	DWORD            dwScreenWidth;
 	DWORD            dwScreenHeight;
-    DWORD            dwAspectX;
-    DWORD            dwAspectY;
+    DWORD            dwTextureWidth;
+    DWORD            dwTextureHeight;
+	INT              iAudioDevice;
 	INT              iSurroundOPLOffset;
 	INT              iAudioChannels;
 	INT              iSampleRate;
@@ -187,7 +197,8 @@ typedef struct tagCONFIGURATION
 	LOGLEVEL         iLogLevel;
 	MUSICTYPE        eMusicType;
 	MUSICTYPE        eCDType;
-	OPLTYPE          eOPLType;
+	OPLCORE_TYPE     eOPLCore;
+	OPLCHIP_TYPE     eOPLChip;
 	WORD             wAudioBufferSize;
 	BOOL             fIsWIN95;
 	BOOL             fUseSurroundOPL;
@@ -199,6 +210,8 @@ typedef struct tagCONFIGURATION
 	BOOL             fEnableKeyRepeat;
 	BOOL             fUseTouchOverlay;
 	BOOL             fEnableAviPlay;
+	BOOL             fEnableGLSL;
+    BOOL             fEnableHDR;
 #if USE_RIX_EXTRA_INIT
 	uint32_t        *pExtraFMRegs;
 	uint8_t         *pExtraFMVals;
@@ -223,13 +236,6 @@ PAL_SaveConfig(
 void
 PAL_FreeConfig(
 	void
-);
-
-BOOL
-PAL_ParseConfigLine(
-	const char * line,
-	const ConfigItem ** pItem,
-	ConfigValue * pValue
 );
 
 const char *

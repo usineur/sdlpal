@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -21,6 +21,7 @@
 //
 
 #include "main.h"
+#include "fight.h"
 
 extern WORD g_rgPlayerPos[3][3][2];
 
@@ -66,7 +67,7 @@ PAL_PlayerInfoBox(
    const BYTE      rgStatusPos[kStatusAll][2] =
    {
       {35, 19},  // confused
-      {0, 0},    // slow
+      {44, 12},  // slow
       {54, 1},   // sleep
       {55, 20},  // silence
       {0, 0},    // puppet
@@ -79,7 +80,7 @@ PAL_PlayerInfoBox(
    const WORD      rgwStatusWord[kStatusAll] =
    {
       0x1D,  // confused
-      0x00,  // slow
+      0x1B,  // slow
       0x1C,  // sleep
       0x1A,  // silence
       0x00,  // puppet
@@ -92,7 +93,7 @@ PAL_PlayerInfoBox(
    const BYTE      rgbStatusColor[kStatusAll] =
    {
       0x5F,  // confused
-      0x00,  // slow
+      0xBF,  // slow
       0x0E,  // sleep
       0x3C,  // silence
       0x00,  // puppet
@@ -310,27 +311,30 @@ PAL_BattleUIIsActionValid(
       {
          return FALSE;
       }
+#ifndef PAL_CLASSIC
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
          w = gpGlobals->rgParty[i].wPlayerRole;
 
-#ifndef PAL_CLASSIC
          if (gpGlobals->g.PlayerRoles.rgwHP[w] < gpGlobals->g.PlayerRoles.rgwMaxHP[w] / 5 ||
             gpGlobals->rgPlayerStatus[w][kStatusSleep] != 0 ||
             gpGlobals->rgPlayerStatus[w][kStatusConfused] != 0 ||
             gpGlobals->rgPlayerStatus[w][kStatusSilence] != 0 ||
             g_Battle.rgPlayer[i].flTimeMeter < 100 ||
             g_Battle.rgPlayer[i].state == kFighterAct)
-#else
-         if (gpGlobals->g.PlayerRoles.rgwHP[w] < gpGlobals->g.PlayerRoles.rgwMaxHP[w] / 5 ||
-            gpGlobals->rgPlayerStatus[w][kStatusSleep] != 0 ||
-            gpGlobals->rgPlayerStatus[w][kStatusConfused] != 0 ||
-            gpGlobals->rgPlayerStatus[w][kStatusSilence] != 0)
-#endif
          {
             return FALSE;
          }
       }
+#else
+      {
+         int healthyNumber = 0;
+         for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
+            if (PAL_IsPlayerHealthy(gpGlobals->rgParty[i].wPlayerRole))
+               healthyNumber++;
+         return PAL_IsPlayerHealthy(wPlayerRole) && healthyNumber > 1;
+      }
+#endif
       break;
    }
 
@@ -654,9 +658,9 @@ PAL_BattleUIUseItem(
          else
          {
 #ifdef PAL_CLASSIC
-            g_Battle.UI.wSelectedIndex = 0;
+            g_Battle.UI.iSelectedIndex = 0;
 #else
-            g_Battle.UI.wSelectedIndex = g_Battle.UI.wCurPlayerIndex;
+            g_Battle.UI.iSelectedIndex = g_Battle.UI.wCurPlayerIndex;
 #endif
             g_Battle.UI.state = kBattleUISelectTargetPlayer;
          }
@@ -702,8 +706,10 @@ PAL_BattleUIThrowItem(
          }
          else
          {
-            g_Battle.UI.wSelectedIndex = g_Battle.UI.wPrevEnemyTarget;
+            if(g_Battle.UI.iPrevEnemyTarget != -1)
+               g_Battle.UI.iSelectedIndex = g_Battle.UI.iPrevEnemyTarget;
             g_Battle.UI.state = kBattleUISelectTargetEnemy;
+            g_Battle.UI.iSelectedIndex = 0;
          }
       }
       else
@@ -838,7 +844,7 @@ PAL_BattleUIUpdate(
          if (w == 0)
          {
             g_Battle.UI.wActionType = kBattleActionAttack;
-            g_Battle.UI.wSelectedIndex = PAL_BattleSelectAutoTarget();
+            g_Battle.UI.iSelectedIndex = PAL_BattleSelectAutoTarget();
          }
          else
          {
@@ -847,11 +853,11 @@ PAL_BattleUIUpdate(
 
             if (gpGlobals->g.rgObject[w].magic.wFlags & kMagicFlagApplyToAll)
             {
-               g_Battle.UI.wSelectedIndex = -1;
+               g_Battle.UI.iSelectedIndex = -1;
             }
             else
             {
-               g_Battle.UI.wSelectedIndex = PAL_BattleSelectAutoTarget();
+               g_Battle.UI.iSelectedIndex = PAL_BattleSelectAutoTarget();
             }
          }
 
@@ -926,11 +932,11 @@ PAL_BattleUIUpdate(
 
          if (PAL_PlayerCanAttackAll(gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole))
          {
-            g_Battle.UI.wSelectedIndex = -1;
+            g_Battle.UI.iSelectedIndex = -1;
          }
          else
          {
-            g_Battle.UI.wSelectedIndex = PAL_BattleSelectAutoTarget();
+            g_Battle.UI.iSelectedIndex = PAL_BattleSelectAutoTarget();
          }
 
          PAL_BattleCommitAction(FALSE);
@@ -962,11 +968,11 @@ PAL_BattleUIUpdate(
 
          if (PAL_PlayerCanAttackAll(gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole))
          {
-            g_Battle.UI.wSelectedIndex = -1;
+            g_Battle.UI.iSelectedIndex = -1;
          }
          else
          {
-            g_Battle.UI.wSelectedIndex = PAL_BattleSelectAutoTarget();
+            g_Battle.UI.iSelectedIndex = PAL_BattleSelectAutoTarget();
          }
 
          PAL_BattleCommitAction(FALSE);
@@ -1091,8 +1097,10 @@ PAL_BattleUIUpdate(
                   }
                   else
                   {
-                     g_Battle.UI.wSelectedIndex = g_Battle.UI.wPrevEnemyTarget;
+                     if(g_Battle.UI.iPrevEnemyTarget != -1)
+                        g_Battle.UI.iSelectedIndex = g_Battle.UI.iPrevEnemyTarget;
                      g_Battle.UI.state = kBattleUISelectTargetEnemy;
+                     g_Battle.UI.iSelectedIndex = 0;
                   }
                   break;
 
@@ -1122,8 +1130,10 @@ PAL_BattleUIUpdate(
                      }
                      else
                      {
-                        g_Battle.UI.wSelectedIndex = g_Battle.UI.wPrevEnemyTarget;
+                        if(g_Battle.UI.iPrevEnemyTarget != -1)
+                           g_Battle.UI.iSelectedIndex = g_Battle.UI.iPrevEnemyTarget;
                         g_Battle.UI.state = kBattleUISelectTargetEnemy;
+                        g_Battle.UI.iSelectedIndex = 0;
                      }
                   }
                   else
@@ -1135,9 +1145,9 @@ PAL_BattleUIUpdate(
                      else
                      {
 #ifdef PAL_CLASSIC
-                        g_Battle.UI.wSelectedIndex = 0;
+                        g_Battle.UI.iSelectedIndex = 0;
 #else
-                        g_Battle.UI.wSelectedIndex = g_Battle.UI.wCurPlayerIndex;
+                        g_Battle.UI.iSelectedIndex = g_Battle.UI.wCurPlayerIndex;
 #endif
                         g_Battle.UI.state = kBattleUISelectTargetPlayer;
                      }
@@ -1149,7 +1159,7 @@ PAL_BattleUIUpdate(
                   // Misc menu
                   //
                   g_Battle.UI.MenuState = kBattleMenuMisc;
-                  g_iCurMiscMenuItem = 0;
+//                  g_iCurMiscMenuItem = 0; //disabled due to not same as both original version
                   break;
                }
             }
@@ -1168,11 +1178,11 @@ PAL_BattleUIUpdate(
 
                   if (PAL_PlayerCanAttackAll(gpGlobals->rgParty[g_Battle.UI.wCurPlayerIndex].wPlayerRole))
                   {
-                     g_Battle.UI.wSelectedIndex = -1;
+                     g_Battle.UI.iSelectedIndex = -1;
                   }
                   else
                   {
-                     g_Battle.UI.wSelectedIndex = PAL_BattleSelectAutoTarget();
+                     g_Battle.UI.iSelectedIndex = PAL_BattleSelectAutoTarget();
                   }
                }
                else
@@ -1182,11 +1192,11 @@ PAL_BattleUIUpdate(
 
                   if (gpGlobals->g.rgObject[w].magic.wFlags & kMagicFlagApplyToAll)
                   {
-                     g_Battle.UI.wSelectedIndex = -1;
+                     g_Battle.UI.iSelectedIndex = -1;
                   }
                   else
                   {
-                     g_Battle.UI.wSelectedIndex = PAL_BattleSelectAutoTarget();
+                     g_Battle.UI.iSelectedIndex = PAL_BattleSelectAutoTarget();
                   }
                }
 
@@ -1312,8 +1322,10 @@ PAL_BattleUIUpdate(
                      }
                      else
                      {
-                        g_Battle.UI.wSelectedIndex = g_Battle.UI.wPrevEnemyTarget;
+                        if(g_Battle.UI.iPrevEnemyTarget != -1)
+                           g_Battle.UI.iSelectedIndex = g_Battle.UI.iPrevEnemyTarget;
                         g_Battle.UI.state = kBattleUISelectTargetEnemy;
+                        g_Battle.UI.iSelectedIndex = 0;
                      }
                   }
                   else
@@ -1325,9 +1337,9 @@ PAL_BattleUIUpdate(
                      else
                      {
 #ifdef PAL_CLASSIC
-                        g_Battle.UI.wSelectedIndex = 0;
+                        g_Battle.UI.iSelectedIndex = 0;
 #else
-                        g_Battle.UI.wSelectedIndex = g_Battle.UI.wCurPlayerIndex;
+                        g_Battle.UI.iSelectedIndex = g_Battle.UI.wCurPlayerIndex;
 #endif
                         g_Battle.UI.state = kBattleUISelectTargetPlayer;
                      }
@@ -1359,7 +1371,7 @@ PAL_BattleUIUpdate(
                case 1: // item
 #endif
                   g_Battle.UI.MenuState = kBattleMenuMiscItemSubMenu;
-                  g_iCurSubMenuItem = 0;
+//                  g_iCurSubMenuItem = 0; //disabled due to not same as both original version
                   break;
 
 #ifdef PAL_CLASSIC
@@ -1450,24 +1462,34 @@ PAL_BattleUIUpdate(
       //
       if (y == 1)
       {
-         g_Battle.UI.wPrevEnemyTarget = (WORD)x;
+//         g_Battle.UI.iPrevEnemyTarget = x;  //disabled due to not same as both original version
+         if( g_Battle.UI.iSelectedIndex == -1 )
+            g_Battle.UI.iSelectedIndex = x;
+         else
+             for (g_Battle.UI.iSelectedIndex = 0; g_Battle.UI.iSelectedIndex < MAX_ENEMIES_IN_TEAM; g_Battle.UI.iSelectedIndex++)
+                 if (g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID != 0)
+                     break;
          PAL_BattleCommitAction(FALSE);
          break;
       }
 #endif
-      if (g_Battle.UI.wSelectedIndex > x)
+      if (g_Battle.UI.iSelectedIndex > x)
       {
-         g_Battle.UI.wSelectedIndex = x;
+         g_Battle.UI.iSelectedIndex = x;
+      }
+      else if (g_Battle.UI.iSelectedIndex < 0)
+      {
+         g_Battle.UI.iSelectedIndex = 0;
       }
 
       for (i = 0; i <= x; i++)
       {
-         if (g_Battle.rgEnemy[g_Battle.UI.wSelectedIndex].wObjectID != 0)
+         if (g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID != 0)
          {
             break;
          }
-         g_Battle.UI.wSelectedIndex++;
-         g_Battle.UI.wSelectedIndex %= x + 1;
+         g_Battle.UI.iSelectedIndex++;
+         g_Battle.UI.iSelectedIndex %= x + 1;
       }
 
       //
@@ -1475,7 +1497,7 @@ PAL_BattleUIUpdate(
       //
       if (s_iFrame & 1)
       {
-         i = g_Battle.UI.wSelectedIndex;
+         i = g_Battle.UI.iSelectedIndex;
 
          x = PAL_X(g_Battle.rgEnemy[i].pos);
          y = PAL_Y(g_Battle.rgEnemy[i].pos);
@@ -1493,31 +1515,29 @@ PAL_BattleUIUpdate(
       }
       else if (g_InputState.dwKeyPress & kKeySearch)
       {
-         g_Battle.UI.wPrevEnemyTarget = g_Battle.UI.wSelectedIndex;
+//         g_Battle.UI.iPrevEnemyTarget = g_Battle.UI.iSelectedIndex; //disabled due to not same as both original version
          PAL_BattleCommitAction(FALSE);
       }
       else if (g_InputState.dwKeyPress & (kKeyLeft | kKeyDown))
       {
-         if (g_Battle.UI.wSelectedIndex != 0)
+         g_Battle.UI.iSelectedIndex--;
+         if( g_Battle.UI.iSelectedIndex < 0 ) g_Battle.UI.iSelectedIndex = MAX_ENEMIES_IN_TEAM-1;
+         while (g_Battle.UI.iSelectedIndex != 0 &&
+            g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID == 0)
          {
-            g_Battle.UI.wSelectedIndex--;
-            while (g_Battle.UI.wSelectedIndex != 0 &&
-               g_Battle.rgEnemy[g_Battle.UI.wSelectedIndex].wObjectID == 0)
-            {
-               g_Battle.UI.wSelectedIndex--;
-            }
+            g_Battle.UI.iSelectedIndex--;
+            if( g_Battle.UI.iSelectedIndex < 0 ) g_Battle.UI.iSelectedIndex = MAX_ENEMIES_IN_TEAM-1;
          }
       }
       else if (g_InputState.dwKeyPress & (kKeyRight | kKeyUp))
       {
-         if (g_Battle.UI.wSelectedIndex < x)
+         g_Battle.UI.iSelectedIndex++;
+         if( g_Battle.UI.iSelectedIndex >= MAX_ENEMIES_IN_TEAM ) g_Battle.UI.iSelectedIndex = 0;
+         while (g_Battle.UI.iSelectedIndex < MAX_ENEMIES_IN_TEAM &&
+            g_Battle.rgEnemy[g_Battle.UI.iSelectedIndex].wObjectID == 0)
          {
-            g_Battle.UI.wSelectedIndex++;
-            while (g_Battle.UI.wSelectedIndex < x &&
-               g_Battle.rgEnemy[g_Battle.UI.wSelectedIndex].wObjectID == 0)
-            {
-               g_Battle.UI.wSelectedIndex++;
-            }
+            g_Battle.UI.iSelectedIndex++;
+            if( g_Battle.UI.iSelectedIndex >= MAX_ENEMIES_IN_TEAM ) g_Battle.UI.iSelectedIndex = 0;
          }
       }
       break;
@@ -1529,7 +1549,7 @@ PAL_BattleUIUpdate(
       //
       if (gpGlobals->wMaxPartyMemberIndex == 0)
       {
-         g_Battle.UI.wSelectedIndex = 0;
+         g_Battle.UI.iSelectedIndex = 0;
          PAL_BattleCommitAction(FALSE);
       }
 #endif
@@ -1543,8 +1563,8 @@ PAL_BattleUIUpdate(
       //
       // Draw arrows on the selected player
       //
-      x = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][g_Battle.UI.wSelectedIndex][0] - 8;
-      y = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][g_Battle.UI.wSelectedIndex][1] - 67;
+      x = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][g_Battle.UI.iSelectedIndex][0] - 8;
+      y = g_rgPlayerPos[gpGlobals->wMaxPartyMemberIndex][g_Battle.UI.iSelectedIndex][1] - 67;
 
       PAL_RLEBlitToSurface(PAL_SpriteGetFrame(gpSpriteUI, j), gpScreen, PAL_XY(x, y));
 
@@ -1558,24 +1578,24 @@ PAL_BattleUIUpdate(
       }
       else if (g_InputState.dwKeyPress & (kKeyLeft | kKeyDown))
       {
-         if (g_Battle.UI.wSelectedIndex != 0)
+         if (g_Battle.UI.iSelectedIndex != 0)
          {
-            g_Battle.UI.wSelectedIndex--;
+            g_Battle.UI.iSelectedIndex--;
          }
          else
          {
-            g_Battle.UI.wSelectedIndex = gpGlobals->wMaxPartyMemberIndex;
+            g_Battle.UI.iSelectedIndex = gpGlobals->wMaxPartyMemberIndex;
          }
       }
       else if (g_InputState.dwKeyPress & (kKeyRight | kKeyUp))
       {
-         if (g_Battle.UI.wSelectedIndex < gpGlobals->wMaxPartyMemberIndex)
+         if (g_Battle.UI.iSelectedIndex < gpGlobals->wMaxPartyMemberIndex)
          {
-            g_Battle.UI.wSelectedIndex++;
+            g_Battle.UI.iSelectedIndex++;
          }
          else
          {
-            g_Battle.UI.wSelectedIndex = 0;
+            g_Battle.UI.iSelectedIndex = 0;
          }
       }
 
@@ -1586,7 +1606,7 @@ PAL_BattleUIUpdate(
       //
       // Don't bother selecting
       //
-      g_Battle.UI.wSelectedIndex = (WORD)-1;
+      g_Battle.UI.iSelectedIndex = (WORD)-1;
       PAL_BattleCommitAction(FALSE);
 #else
       if (g_Battle.UI.wActionType == kBattleActionCoopMagic)
@@ -1626,7 +1646,7 @@ PAL_BattleUIUpdate(
       }
       else if (g_InputState.dwKeyPress & kKeySearch)
       {
-         g_Battle.UI.wSelectedIndex = (WORD)-1;
+         g_Battle.UI.iSelectedIndex = -1;
          PAL_BattleCommitAction(FALSE);
       }
 #endif
@@ -1637,7 +1657,7 @@ PAL_BattleUIUpdate(
       //
       // Don't bother selecting
       //
-      g_Battle.UI.wSelectedIndex = (WORD)-1;
+      g_Battle.UI.iSelectedIndex = (WORD)-1;
       PAL_BattleCommitAction(FALSE);
 #else
       j = SPRITENUM_BATTLE_ARROW_SELECTEDPLAYER;
@@ -1673,7 +1693,7 @@ PAL_BattleUIUpdate(
       }
       else if (g_InputState.dwKeyPress & kKeySearch)
       {
-         g_Battle.UI.wSelectedIndex = (WORD)-1;
+         g_Battle.UI.iSelectedIndex = -1;
          PAL_BattleCommitAction(FALSE);
       }
 #endif

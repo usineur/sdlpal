@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -438,7 +438,7 @@ OGG_Play(
 
 	player->iMusic = iNum;
 
-	player->fp = UTIL_OpenFile(PAL_va(0, "ogg/%.2d.ogg", iNum));
+	player->fp = UTIL_OpenFile(PAL_va(0, "ogg%s%.2d.ogg", PAL_NATIVE_PATH_SEPARATOR, iNum));
 	if (player->fp == NULL)
 	{
 		return FALSE;

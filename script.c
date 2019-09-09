@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -510,8 +510,8 @@ PAL_AdditionalCredits(
    LPCWSTR rgszcps[][CP_MAX] = {
 	   // Traditional Chinese, Simplified Chinese
 	   { L"", L"", /*L""*/ },
-	   { L"         \x7D93\x5178\x7279\x5225\x7BC7   ",
-	     L"         \x7ECF\x5178\x7279\x522B\x7BC7   ",
+	   { L"         經典特別篇   ",
+	     L"         经典特别篇   ",
 	     //L"   \x30AF\x30E9\x30B7\x30C3\x30AF\x7279\x5225\x7DE8  "
 	   },
 	   { L"", L"", /*L""*/ },
@@ -520,17 +520,17 @@ PAL_AdditionalCredits(
 	   { L"", L"", /*L""*/ },
 	   { L"", L"", /*L""*/ },
 	   { L"", L"", /*L""*/ },
-	   { L"   \x672C\x7A0B\x5F0F\x662F\x81EA\x7531\x8EDF\x9AD4\xFF0C\x6309\x7167 GNU General",
-	     L"   \x672C\x7A0B\x5E8F\x662F\x81EA\x7531\x8F6F\x4EF6\xFF0C\x6309\x7167 GNU General",
+	   { L"   本程式是自由軟體，按照 GNU General",
+	     L"   本程序是自由软件，按照 GNU General",
 		 //L" \x3053\x306E\x30D7\x30ED\x30B0\x30E9\x30E0\x306F\x81EA\x7531\x30BD\x30D5\x30C8\x30A6\x30A7\x30A2\x3067\x3059\x3001"
 	   },
-	   { L"   Public License v3 \x6216\x66F4\x9AD8\x7248\x672C\x767C\x4F48",
-	     L"   Public License v3 \x6216\x66F4\x9AD8\x7248\x672C\x53D1\x5E03",
+	   { L"   Public License v3 或更高版本發佈",
+	     L"   Public License v3 或更高版本发布",
 	     //L" GNU General Public License v3 \x306E\x4E0B\x3067"
 	   },
 	   { L"", L"", /*L" \x914D\x5E03\x3055\x308C\x3066\x3044\x307E\x3059\x3002"*/ },
-	   { L"                    ...\x6309 Enter \x7D50\x675F",
-	     L"                    ...\x6309 Enter \x7ED3\x675F",
+	   { L"                    ...按 Enter 結束",
+	     L"                    ...按 Enter 结束",
 	     //L"      ...Enter\x30AD\x30FC\x3092\x62BC\x3057\x3066\x7D42\x4E86\x3057\x307E\x3059"
 	   },
    };
@@ -545,7 +545,7 @@ PAL_AdditionalCredits(
       L" ",
 	  L"    (c) 2009-2011, Wei Mingzhi",
 	  L"        <whistler_wmz@users.sf.net>.",
-      L"    (c) 2011-2017, SDLPAL Team",
+      L"    (c) 2011-2019, SDLPAL Team",
 	  L"%ls",  // Porting information line 1
 	  L"%ls",  // Porting information line 2
 	  L"%ls",  // GNU line 1
@@ -841,13 +841,15 @@ PAL_InterpretInstruction(
       //
       if (pScript->rgwOperand[0])
       {
+         g_fScriptSuccess = FALSE;
          //
          // Apply to everyone
          //
          for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
          {
             w = gpGlobals->rgParty[i].wPlayerRole;
-            PAL_IncreaseHPMP(w, (SHORT)(pScript->rgwOperand[1]), 0);
+            if (PAL_IncreaseHPMP(w, (SHORT)(pScript->rgwOperand[1]), 0))
+               g_fScriptSuccess = TRUE;
          }
       }
       else
@@ -947,18 +949,18 @@ PAL_InterpretInstruction(
       //
       // Remove item from inventory
       //
-      if (!PAL_AddItemToInventory(pScript->rgwOperand[0],
-         -((pScript->rgwOperand[1] == 0) ? 1 : pScript->rgwOperand[1])))
+      x = pScript->rgwOperand[1];
+      if (x == 0)
+      {
+         x = 1;
+      }
+      if (x <= PAL_CountItem(pScript->rgwOperand[0]) || pScript->rgwOperand[2] == 0)
+      {
+      if (!PAL_AddItemToInventory(pScript->rgwOperand[0], -x))
       {
          //
          // Try removing equipped item
          //
-         x = pScript->rgwOperand[1];
-         if (x == 0)
-         {
-            x = 1;
-         }
-
          for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
          {
             w = gpGlobals->rgParty[i].wPlayerRole;
@@ -978,12 +980,10 @@ PAL_InterpretInstruction(
                }
             }
          }
-
-         if (x > 0 && pScript->rgwOperand[2] != 0)
-         {
-            wScriptEntry = pScript->rgwOperand[2] - 1;
-         }
       }
+      }
+      else
+          wScriptEntry = pScript->rgwOperand[2] - 1;
       break;
 
    case 0x0021:
@@ -1345,8 +1345,7 @@ PAL_InterpretInstruction(
       i = ((pScript->rgwOperand[0] == kStatusSlow) ? 14 : 9);
 #endif
 
-      if (RandomLong(0, i) >= gpGlobals->g.rgObject[w].enemy.wResistanceToSorcery &&
-         g_Battle.rgEnemy[wEventObjectID].rgwStatus[pScript->rgwOperand[0]] == 0)
+      if (RandomLong(0, i) > gpGlobals->g.rgObject[w].enemy.wResistanceToSorcery)
       {
          g_Battle.rgEnemy[wEventObjectID].rgwStatus[pScript->rgwOperand[0]] = pScript->rgwOperand[1];
       }
@@ -1436,9 +1435,41 @@ PAL_InterpretInstruction(
 
          PAL_AddItemToInventory(gpGlobals->g.lprgStore[0].rgwItems[i], 1);
 
-         PAL_StartDialog(kDialogCenterWindow, 0, 0, FALSE);
-         PAL_swprintf(s, sizeof(s) / sizeof(WCHAR), L"%ls%ls", PAL_GetWord(42), PAL_GetWord(gpGlobals->g.lprgStore[0].rgwItems[i]));
+         g_TextLib.iDialogShadow = 5;
+         PAL_StartDialogWithOffset(kDialogCenterWindow, 0, 0, FALSE, 0, -10);
+         PAL_swprintf(s, sizeof(s) / sizeof(WCHAR), L"%ls@%ls@", PAL_GetWord(42),
+            PAL_GetWord(gpGlobals->g.lprgStore[0].rgwItems[i]));
+         LPCBITMAPRLE pBG = PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX);
+         INT iBGWidth = PAL_RLEGetWidth(pBG), iBGHeight = PAL_RLEGetHeight(pBG);
+         INT iBG_X = (320 - iBGWidth) / 2, iBG_Y = (200 - iBGHeight) / 2;
+         PAL_POS pos = PAL_XY(iBG_X, iBG_Y);
+         SDL_Rect rect = {iBG_X, iBG_Y, iBGWidth, iBGHeight};
+         PAL_RLEBlitToSurface(pBG, gpScreen, pos);
+         
+         WORD wObject = gpGlobals->g.lprgStore[0].rgwItems[i];
+         static WORD wPrevImageIndex = 0xFFFF;
+         static BYTE bufImage[2048];
+         if (gpGlobals->g.rgObject[wObject].item.wBitmap != wPrevImageIndex)
+         {
+            if (PAL_MKFReadChunk(bufImage, 2048,
+                                 gpGlobals->g.rgObject[wObject].item.wBitmap, gpGlobals->f.fpBALL) > 0)
+            {
+               wPrevImageIndex = gpGlobals->g.rgObject[wObject].item.wBitmap;
+            }
+            else
+            {
+               wPrevImageIndex = 0xFFFF;
+            }
+         }
+         if (wPrevImageIndex != 0xFFFF)
+         {
+            PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(PAL_X(pos)+8, PAL_Y(pos)+7));
+         }
+         
+         VIDEO_UpdateScreen(&rect);
+         
          PAL_ShowDialogText(s);
+         g_TextLib.iDialogShadow = 0;
       }
       else
       {
@@ -1475,7 +1506,7 @@ PAL_InterpretInstruction(
       //
       PAL_RNGPlay(gpGlobals->iCurPlayingRNG,
          pScript->rgwOperand[0],
-         pScript->rgwOperand[1] > 0 ? pScript->rgwOperand[1] : 999,
+         pScript->rgwOperand[1] > 0 ? pScript->rgwOperand[1] : -1,
          pScript->rgwOperand[2] > 0 ? pScript->rgwOperand[2] : 16);
       break;
 
@@ -1572,7 +1603,7 @@ PAL_InterpretInstruction(
       // Set background music
       //
       gpGlobals->wNumMusic = pScript->rgwOperand[0];
-      AUDIO_PlayMusic(pScript->rgwOperand[0], (pScript->rgwOperand[0] != 0x3D), pScript->rgwOperand[1]);
+      AUDIO_PlayMusic(pScript->rgwOperand[0], pScript->rgwOperand[1] != 1, (pScript->rgwOperand[1] == 3 && pScript->rgwOperand[0] != 9) ? 3.0f : 0.0f);
       break;
 
    case 0x0044:
@@ -1640,7 +1671,8 @@ PAL_InterpretInstruction(
       //
       // Set the state of event object
       //
-      pCurrent->sState = pScript->rgwOperand[1];
+      if (pScript->rgwOperand[0] != 0)
+         pCurrent->sState = pScript->rgwOperand[1];
       break;
 
    case 0x004A:
@@ -2144,7 +2176,7 @@ PAL_InterpretInstruction(
       // Stop current playing music
       //
       AUDIO_PlayMusic(0, FALSE,
-         (pScript->rgwOperand[0] == 0) ? 2.0f : (FLOAT)(pScript->rgwOperand[0]) * 2);
+         (pScript->rgwOperand[0] == 0) ? 2.0f : (FLOAT)(pScript->rgwOperand[0]) * 3);
       gpGlobals->wNumMusic = 0;
       break;
 
@@ -2541,19 +2573,25 @@ PAL_InterpretInstruction(
 
    case 0x0091:
       //
-      // Jump if the enemy is not alone
+      // Jump if the enemy is not first of same kind
       //
-      if (gpGlobals->fInBattle)
       {
-         for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
+         int self_pos=0;
+         int count=0;
+         if (gpGlobals->fInBattle)
          {
-            if (i != wEventObjectID &&
-               g_Battle.rgEnemy[i].wObjectID == g_Battle.rgEnemy[wEventObjectID].wObjectID)
+            for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
             {
-               wScriptEntry = pScript->rgwOperand[0] - 1;
-               break;
+               if (g_Battle.rgEnemy[i].wObjectID == g_Battle.rgEnemy[wEventObjectID].wObjectID)
+               {
+                  count++;
+                  if(i==wEventObjectID)
+                     self_pos=count;
+               }
             }
          }
+         if(self_pos>1)
+            wScriptEntry = pScript->rgwOperand[0] - 1;
       }
       break;
 
@@ -2695,7 +2733,7 @@ PAL_InterpretInstruction(
 
    case 0x009C:
       //
-      // Enemy duplicate itself
+      // Enemy division itself
       //
       w = 0;
 
@@ -2707,10 +2745,11 @@ PAL_InterpretInstruction(
          }
       }
 
-      if (w != 1)
+      if (w != 1 || g_Battle.rgEnemy[wCurEventObjectID].e.wHealth <= 1)
       {
          //
-         // Duplication is only possible when only 1 enemy left
+         // Division is only possible when only 1 enemy left
+         // health too low also cannot division
          //
          if (pScript->rgwOperand[1] != 0)
          {
@@ -2724,17 +2763,22 @@ PAL_InterpretInstruction(
       {
          w = 1;
       }
+      x = w + 1;
+      y = w;
 
-      for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
+      //division does not limited by original team layout
+      for (i = 0; i < MAX_ENEMIES_IN_TEAM; i++)
       {
          if (w > 0 && g_Battle.rgEnemy[i].wObjectID == 0)
          {
             w--;
 
+            //notice: MAX MAY VARYING IN DIVISION!
             memset(&(g_Battle.rgEnemy[i]), 0, sizeof(BATTLEENEMY));
 
             g_Battle.rgEnemy[i].wObjectID = g_Battle.rgEnemy[wEventObjectID].wObjectID;
             g_Battle.rgEnemy[i].e = g_Battle.rgEnemy[wEventObjectID].e;
+            g_Battle.rgEnemy[i].e.wHealth = (g_Battle.rgEnemy[wEventObjectID].e.wHealth+y)/x;
             g_Battle.rgEnemy[i].wScriptOnTurnStart = g_Battle.rgEnemy[wEventObjectID].wScriptOnTurnStart;
             g_Battle.rgEnemy[i].wScriptOnBattleEnd = g_Battle.rgEnemy[wEventObjectID].wScriptOnBattleEnd;
             g_Battle.rgEnemy[i].wScriptOnReady = g_Battle.rgEnemy[wEventObjectID].wScriptOnReady;
@@ -2742,8 +2786,16 @@ PAL_InterpretInstruction(
             g_Battle.rgEnemy[i].state = kFighterWait;
             g_Battle.rgEnemy[i].flTimeMeter = 50;
             g_Battle.rgEnemy[i].iColorShift = 0;
+
          }
       }
+      g_Battle.rgEnemy[wCurEventObjectID].e.wHealth = (g_Battle.rgEnemy[wEventObjectID].e.wHealth+y)/x;
+
+      w = 0;
+      for (i = 0; i < MAX_ENEMIES_IN_TEAM; i++)
+         if (g_Battle.rgEnemy[i].wObjectID != 0 )
+            w=i;
+      g_Battle.wMaxEnemyIndex = w;
 
       PAL_LoadBattleSprites();
 
@@ -2777,6 +2829,13 @@ PAL_InterpretInstruction(
       //
       // Enemy summons another monster
       //
+      for (i = 0; i < g_Battle.rgEnemy[wEventObjectID].e.wMagicFrames; i++)
+      {
+         g_Battle.rgEnemy[wEventObjectID].wCurrentFrame =
+         g_Battle.rgEnemy[wEventObjectID].e.wIdleFrames + i;
+         PAL_BattleDelay(g_Battle.rgEnemy[wEventObjectID].e.wActWaitFrames, 0, FALSE);
+      }
+
       x = 0;
       w = pScript->rgwOperand[0];
       y = (((SHORT)(pScript->rgwOperand[1]) <= 0) ? 1 : (SHORT)pScript->rgwOperand[1]);
@@ -2830,13 +2889,14 @@ PAL_InterpretInstruction(
             }
          }
 
-         PAL_BattleDelay(2, 0, TRUE);
-
          VIDEO_BackupScreen(g_Battle.lpSceneBuf);
          PAL_LoadBattleSprites();
          PAL_BattleMakeScene();
          AUDIO_PlaySound(212);
          PAL_BattleFadeScene();
+
+         // avoid releasing gesture disappears before summon done
+         PAL_BattleDelay(2, 0, TRUE);
 
          for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++)
          {
@@ -2976,6 +3036,59 @@ PAL_InterpretInstruction(
    return wScriptEntry + 1;
 }
 
+PAL_FORCE_INLINE
+INT
+MESSAGE_GetSpan(
+    WORD *pwScriptEntry
+)
+/*++
+ Purpose:
+
+ Get the final span of a message block which started from message index of wScriptEntry
+ 
+ Parameters:
+ 
+ [IN]  pwScriptEntry - The pointer of script entry which starts the message block, must be a 0xffff command.
+ 
+ Return value:
+ 
+ The final span of the message block.
+ 
+ --*/
+{
+    int currentScriptEntry = *pwScriptEntry;
+    int result=0;
+    int beginning = 1;
+    int firstMsgIndex, lastMsgIndex;
+
+    // ensure the command is 0xFFFF
+    assert(gpGlobals->g.lprgScriptEntry[currentScriptEntry].wOperation == 0xFFFF);
+
+    firstMsgIndex = lastMsgIndex = gpGlobals->g.lprgScriptEntry[currentScriptEntry].rgwOperand[0];
+
+    //
+    // If the NEXT command is 0xFFFF, but the message index is not continuous or not incremental,
+    // this MESSAGE block shoud end at THIS command.
+    //
+    if( gpGlobals->g.lprgScriptEntry[currentScriptEntry+1].wOperation == 0xFFFF && gpGlobals->g.lprgScriptEntry[currentScriptEntry+1].rgwOperand[0] != lastMsgIndex + 1)
+        currentScriptEntry++;
+    else
+        while ((gpGlobals->g.lprgScriptEntry[currentScriptEntry].wOperation == 0xFFFF &&
+                (!beginning ? gpGlobals->g.lprgScriptEntry[currentScriptEntry].rgwOperand[0] == lastMsgIndex + 1 : 1))
+               || gpGlobals->g.lprgScriptEntry[currentScriptEntry].wOperation == 0x008E)
+        {
+            if(gpGlobals->g.lprgScriptEntry[currentScriptEntry].wOperation == 0xFFFF)
+                lastMsgIndex = gpGlobals->g.lprgScriptEntry[currentScriptEntry].rgwOperand[0];
+            currentScriptEntry++;
+            beginning = 0;
+        }
+
+    result = lastMsgIndex - firstMsgIndex;
+    assert(result >= 0);
+    *pwScriptEntry = currentScriptEntry;
+    return result;
+}
+
 WORD
 PAL_RunTriggerScript(
    WORD           wScriptEntry,
@@ -3035,7 +3148,7 @@ PAL_RunTriggerScript(
    {
       pScript = &(gpGlobals->g.lprgScriptEntry[wScriptEntry]);
 
-      UTIL_LogOutput(LOGLEVEL_DEBUG, "[SCRIPT] %.4x: %.4x %.4x %.4x\n", wScriptEntry,
+      UTIL_LogOutput(LOGLEVEL_DEBUG, "[SCRIPT] %.4x: %.4x %.4x %.4x %.4x\n", wScriptEntry,
          pScript->wOperation, pScript->rgwOperand[0],
          pScript->rgwOperand[1], pScript->rgwOperand[2]);
 
@@ -3281,9 +3394,10 @@ PAL_RunTriggerScript(
          //
          if (gConfig.pszMsgFile)
          {
+            int msgSpan = MESSAGE_GetSpan(&wScriptEntry);
             int idx = 0, iMsg;
-            while ((iMsg = PAL_GetMsgNum(pScript->rgwOperand[0], idx++)) >= 0)
-			{
+            while ((iMsg = PAL_GetMsgNum(pScript->rgwOperand[0], msgSpan, idx++)) >= 0)
+			   {
                if (iMsg == 0)
                {
                   //
@@ -3295,17 +3409,6 @@ PAL_RunTriggerScript(
                }
 			   else
                   PAL_ShowDialogText(PAL_GetMsg(iMsg));
-            }
-            if( gpGlobals->g.lprgScriptEntry[wScriptEntry+1].wOperation == 0xFFFF && gpGlobals->g.lprgScriptEntry[wScriptEntry+1].rgwOperand[0] != pScript->rgwOperand[0] + 1)
-			   wScriptEntry++;
-            else
-            while (gpGlobals->g.lprgScriptEntry[wScriptEntry].wOperation == 0xFFFF
-                || gpGlobals->g.lprgScriptEntry[wScriptEntry].wOperation == 0x008E)
-            {
-               //
-               // Skip all following continuous 0xFFFF & 0x008E instructions
-               //
-               wScriptEntry++;
             }
          }
 		 else
@@ -3459,21 +3562,15 @@ begin:
 
 		   if (gConfig.pszMsgFile)
 		   {
+            int msgSpan = MESSAGE_GetSpan(&wScriptEntry);
 			   int idx = 0, iMsg;
-			   while ((iMsg = PAL_GetMsgNum(pScript->rgwOperand[0], idx++)) >= 0)
+			   while ((iMsg = PAL_GetMsgNum(pScript->rgwOperand[0], msgSpan, idx++)) >= 0)
 			   {
 				   if (iMsg > 0)
 				   {
 					   PAL_DrawText(PAL_GetMsg(iMsg), PAL_XY(XBase, iDescLine * 16 + YBase), DESCTEXT_COLOR, TRUE, FALSE, FALSE);
 					   iDescLine++;
 				   }
-			   }
-			   while (gpGlobals->g.lprgScriptEntry[wScriptEntry].wOperation == 0xFFFF)
-			   {
-				   //
-				   // Skip all following continuous 0xFFFF instructions
-				   //
-				   wScriptEntry++;
 			   }
 		   }
 		   else

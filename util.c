@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -441,6 +441,11 @@ UTIL_OpenRequiredFileForMode(
 
    if (fp == NULL)
    {
+       fp = fopen(lpszFileName, szMode);
+   }
+
+   if (fp == NULL)
+   {
 	   TerminateOnError("File open error(%d): %s!\n", errno, lpszFileName);
    }
 
@@ -615,7 +620,7 @@ UTIL_GetFullPathName(
 			int n = scandir(_base, &list, 0, alphasort);
 			while (n-- > 0)
 			{
-				if (!result && strcasecmp(list[n]->d_name, start) == 0)
+				if (!result && SDL_strcasecmp(list[n]->d_name, start) == 0)
 				{
 					result = UTIL_CombinePath(INTERNAL_BUFFER_SIZE_ARGS, 2, _base, list[n]->d_name);
 					if (end)
@@ -816,8 +821,9 @@ UTIL_Platform_Quit(
 # define PAL_LOG_BUFFER_SIZE      4096
 #endif
 
-#define PAL_LOG_BUFFER_EXTRA_SIZE 32
+#define PAL_LOG_BUFFER_EXTRA_SIZE 32+sizeof(_log_prelude)
 
+static char _log_prelude[80];
 static LOGCALLBACK _log_callbacks[PAL_LOG_MAX_OUTPUTS];
 static LOGLEVEL _log_callback_levels[PAL_LOG_MAX_OUTPUTS];
 static char _log_buffer[PAL_LOG_BUFFER_SIZE + PAL_LOG_BUFFER_EXTRA_SIZE];
@@ -885,7 +891,6 @@ UTIL_LogOutput(
 	struct tm *tmval = localtime(&tv);
 	int        id, n;
 
-	if (level < gConfig.iLogLevel || !_log_callbacks[0]) return;
 	if (level > LOGLEVEL_MAX) level = LOGLEVEL_MAX;
 
 	snprintf(_log_buffer, PAL_LOG_BUFFER_EXTRA_SIZE,
@@ -893,15 +898,22 @@ UTIL_LogOutput(
 		tmval->tm_year + 1900, tmval->tm_mon, tmval->tm_mday,
 		tmval->tm_hour, tmval->tm_min, tmval->tm_sec,
 		_loglevel_str[level]);
+	if( strlen(_log_prelude) > 0 )
+		strncat(_log_buffer, _log_prelude, PAL_LOG_BUFFER_EXTRA_SIZE);
 
 	va_start(va, fmt);
-	n = vsnprintf(_log_buffer + PAL_LOG_BUFFER_EXTRA_SIZE - 1, PAL_LOG_BUFFER_SIZE, fmt, va);
+	n = vsnprintf(_log_buffer + strnlen(_log_buffer, PAL_LOG_BUFFER_EXTRA_SIZE), PAL_LOG_BUFFER_SIZE, fmt, va);
 	va_end(va);
 	n = (n == -1) ? PAL_LOG_BUFFER_EXTRA_SIZE + PAL_LOG_BUFFER_SIZE - 1 : n + PAL_LOG_BUFFER_EXTRA_SIZE;
 	_log_buffer[n--] = '\0';
 	if (_log_buffer[n] != '\n') _log_buffer[n] = '\n';
+    
+    if( level == LOGLEVEL_FATAL )
+        TerminateOnError(_log_buffer);
 
-	for(id = 0; id < PAL_LOG_MAX_OUTPUTS && _log_callbacks[id]; id++)
+    if (level < gConfig.iLogLevel || !_log_callbacks[0]) return;
+
+    for(id = 0; id < PAL_LOG_MAX_OUTPUTS && _log_callbacks[id]; id++)
 	{
 		if (level >= _log_callback_levels[id])
 		{
@@ -930,10 +942,38 @@ UTIL_LogToFile(
 	const char    *__
 )
 {
-	FILE *fp = fopen(gConfig.pszLogFile, "a");
+	FILE *fp = UTIL_OpenFileForMode(gConfig.pszLogFile, "a");
 	if (fp)
 	{
 		fputs(string, fp);
 		fclose(fp);
 	}
 }
+
+void
+UTIL_LogSetPrelude(
+                   const char    *prelude
+)
+{
+    memset(_log_prelude, 0, sizeof(_log_prelude));
+    if( prelude )
+        strncpy(_log_prelude, prelude, sizeof(_log_prelude));
+}
+
+#if PAL_NEED_STRCASESTR
+inline char* stoupper(char* s)
+{
+	char* p = strdup(s);
+	char* p1 = p;
+	while (*p = toupper(*p)) p++;
+	return p1;
+}
+PAL_C_LINKAGE char* strcasestr(const char *a, const char *b) {
+	const char *a1 = stoupper(a);
+	const char *b1 = stoupper(b);
+	char *ptr = strstr(a1, b1);
+	free(a1);
+	free(b1);
+	return ptr;
+}
+#endif

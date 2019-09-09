@@ -220,11 +220,38 @@
   <data name="MusicVolume.Header" xml:space="preserve">
     <value>音乐音量</value>
   </data>
-  <data name="OPL.Header" xml:space="preserve">
-    <value>OPL 模拟器</value>
+  <data name="EnableGLSL.Content" xml:space="preserve">
+    <value>启用GLSL滤镜</value>
   </data>
-  <data name="OPL.PlaceholderText" xml:space="preserve">
-    <value>选择 OPL 模拟器</value>
+  <data name="ShaderFile.PlaceholderText" xml:space="preserve">
+    <value>无自定义Shader</value>
+  </data>
+  <data name="EnableHDR.Header" xml:space="preserve">
+    <value>启用HDR</value>
+  </data>
+  <data name="EnableHDR.OffContent" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="EnableHDR.OnContent" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="TextureWidth.Header" xml:space="preserve">
+    <value>纹理宽度</value>
+  </data>
+  <data name="TextureHeight.Header" xml:space="preserve">
+    <value>纹理高度</value>
+  </data>
+  <data name="OPLChip.Header" xml:space="preserve">
+    <value>OPL 模拟芯片</value>
+  </data>
+  <data name="OPLChip.PlaceholderText" xml:space="preserve">
+    <value>选择 OPL 模拟芯片</value>
+  </data>
+  <data name="OPLCore.Header" xml:space="preserve">
+    <value>OPL 模拟核心</value>
+  </data>
+  <data name="OPLCore.PlaceholderText" xml:space="preserve">
+    <value>选择 OPL 模拟核心</value>
   </data>
   <data name="OPLSR.Header" xml:space="preserve">
     <value>OPL 模拟器采样率</value>
@@ -291,5 +318,11 @@
   </data>
   <data name="Warning.Content" xml:space="preserve">
     <value>普通警告</value>
+  </data>
+  <data name="WindowHeight.Header" xml:space="preserve">
+    <value>窗口高度</value>
+  </data>
+  <data name="WindowWidth.Header" xml:space="preserve">
+    <value>窗口宽度</value>
   </data>
 </root>

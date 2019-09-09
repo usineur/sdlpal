@@ -215,16 +215,43 @@ You can use the main menu option inside the game to return to this page.</value>
     <value>Setting finished</value>
   </data>
   <data name="MessageFile.PlaceholderText" xml:space="preserve">
-    <value>No customized message file</value>
+    <value>No customized localization file</value>
   </data>
   <data name="MusicVolume.Header" xml:space="preserve">
     <value>Music volume</value>
   </data>
-  <data name="OPL.Header" xml:space="preserve">
-    <value>Type of OPL emulator</value>
+  <data name="EnableGLSL.Content" xml:space="preserve">
+    <value>Enable GLSL Filter</value>
   </data>
-  <data name="OPL.PlaceholderText" xml:space="preserve">
-    <value>Choose type of OPL emulator</value>
+  <data name="ShaderFile.PlaceholderText" xml:space="preserve">
+    <value>No GLSL specified</value>
+  </data>
+  <data name="EnableHDR.Header" xml:space="preserve">
+    <value>Enable HDR</value>
+  </data>
+  <data name="EnableHDR.OffContent" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="EnableHDR.OnContent" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="TextureWidth.Header" xml:space="preserve">
+    <value>Render Texture Width</value>
+  </data>
+  <data name="TextureHeight.Header" xml:space="preserve">
+    <value>Render Texture Height</value>
+  </data>
+  <data name="OPLChip.Header" xml:space="preserve">
+    <value>Type of OPL emulator chip</value>
+  </data>
+  <data name="OPLChip.PlaceholderText" xml:space="preserve">
+    <value>Choose type of OPL emulator chip</value>
+  </data>
+  <data name="OPLCore.Header" xml:space="preserve">
+    <value>Type of OPL emulator core</value>
+  </data>
+  <data name="OPLCore.PlaceholderText" xml:space="preserve">
+    <value>Choose type of OPL emulator core</value>
   </data>
   <data name="OPLSR.Header" xml:space="preserve">
     <value>Sample rate of OPL emulator</value>
@@ -284,12 +311,18 @@ You can use the main menu option inside the game to return to this page.</value>
     <value>Log to file</value>
   </data>
   <data name="UseMessageFile.Content" xml:space="preserve">
-    <value>Customized message file</value>
+    <value>Customized localization file</value>
   </data>
   <data name="Verbose.Content" xml:space="preserve">
     <value>Verbose</value>
   </data>
   <data name="Warning.Content" xml:space="preserve">
     <value>Warning</value>
+  </data>
+  <data name="WindowHeight.Header" xml:space="preserve">
+    <value>Window height</value>
+  </data>
+  <data name="WindowWidth.Header" xml:space="preserve">
+    <value>Window width</value>
   </data>
 </root>

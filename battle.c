@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -50,10 +50,11 @@ PAL_BattleMakeScene(
 
 --*/
 {
-   int          i;
+   int          i,j;
    PAL_POS      pos;
    LPBYTE       pSrc, pDst;
    BYTE         b;
+   INT          enemyDrawSeq[MAX_ENEMIES_IN_TEAM];
 
    //
    // Draw the background
@@ -83,11 +84,24 @@ PAL_BattleMakeScene(
 
    PAL_ApplyWave(g_Battle.lpSceneBuf);
 
+   memset(&enemyDrawSeq,-1,sizeof(enemyDrawSeq));
+   // sort by y
+   for (i = 0; i <= g_Battle.wMaxEnemyIndex; i++ )
+      enemyDrawSeq[i] = i;
+   for(i=0;i<g_Battle.wMaxEnemyIndex;i++)
+       for(j=i+1;j<g_Battle.wMaxEnemyIndex;j++)
+           if( PAL_Y(g_Battle.rgEnemy[i].pos) < PAL_Y(g_Battle.rgEnemy[j].pos) ) {
+               INT tmp = enemyDrawSeq[i];
+               enemyDrawSeq[i]=enemyDrawSeq[j];
+               enemyDrawSeq[j]=tmp;
+           }
+
    //
    // Draw the enemies
    //
-   for (i = g_Battle.wMaxEnemyIndex; i >= 0; i--)
+   for (j = g_Battle.wMaxEnemyIndex; j >= 0; j--)
    {
+      i = enemyDrawSeq[j];
       pos = g_Battle.rgEnemy[i].pos;
 
       if (g_Battle.rgEnemy[i].rgwStatus[kStatusConfused] > 0 &&
@@ -177,7 +191,10 @@ PAL_BattleMakeScene(
             //
             // Player is confused
             //
-            pos = PAL_XY(PAL_X(g_Battle.rgPlayer[i].pos), PAL_Y(g_Battle.rgPlayer[i].pos) + RandomLong(-1, 1));
+            int xd = PAL_X(g_Battle.rgPlayer[i].pos), yd = PAL_Y(g_Battle.rgPlayer[i].pos);
+            if(!PAL_IsPlayerDying(gpGlobals->rgParty[i].wPlayerRole))
+               yd += RandomLong(-1, 1);
+            pos = PAL_XY(xd, yd);
             pos = PAL_XY(PAL_X(pos) - PAL_RLEGetWidth(PAL_SpriteGetFrame(g_Battle.rgPlayer[i].lpSprite, g_Battle.rgPlayer[i].wCurrentFrame)) / 2,
                PAL_Y(pos) - PAL_RLEGetHeight(PAL_SpriteGetFrame(g_Battle.rgPlayer[i].lpSprite, g_Battle.rgPlayer[i].wCurrentFrame)));
 
@@ -1312,7 +1329,6 @@ PAL_StartBattle(
 #endif
       g_Battle.rgPlayer[i].wHidingTime = 0;
       g_Battle.rgPlayer[i].state = kFighterWait;
-      g_Battle.rgPlayer[i].action.sTarget = -1;
       g_Battle.rgPlayer[i].fDefending = FALSE;
       g_Battle.rgPlayer[i].wCurrentFrame = 0;
       g_Battle.rgPlayer[i].iColorShift = FALSE;
@@ -1350,8 +1366,8 @@ PAL_StartBattle(
    g_Battle.UI.dwMsgShowTime = 0;
    g_Battle.UI.state = kBattleUIWait;
    g_Battle.UI.fAutoAttack = FALSE;
-   g_Battle.UI.wSelectedIndex = 0;
-   g_Battle.UI.wPrevEnemyTarget = 0;
+   g_Battle.UI.iSelectedIndex = 0;
+   g_Battle.UI.iPrevEnemyTarget = -1;
 
    memset(g_Battle.UI.rgShowNum, 0, sizeof(g_Battle.UI.rgShowNum));
 
@@ -1377,6 +1393,7 @@ PAL_StartBattle(
    g_Battle.fForce = FALSE;
    g_Battle.fFlee = FALSE;
    g_Battle.fPrevAutoAtk = FALSE;
+   g_Battle.fThisTurnCoop = FALSE;
 #endif
 
    //

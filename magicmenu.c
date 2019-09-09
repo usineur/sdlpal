@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -109,8 +109,11 @@ PAL_MagicSelectionMenuUpdate(
    //
    // Make sure the current menu item index is in bound
    //
-   if (g_iCurrentItem + item_delta >= 0 &&
-       g_iCurrentItem + item_delta < g_iNumMagic)
+   if (g_iCurrentItem + item_delta < 0)
+      g_iCurrentItem = 0;
+   else if (g_iCurrentItem + item_delta >= g_iNumMagic)
+      g_iCurrentItem = g_iNumMagic-1;
+   else
       g_iCurrentItem += item_delta;
 
    //

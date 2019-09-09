@@ -1,10 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
-// WinRTIO.cpp: UWP C-style file I/O wrapper for SDLPal.
-// Author: Lou Yihua @ 2016-2017
-//
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017 SDLPAL development team.
+// Copyright (c) 2011-2019 SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -21,6 +18,9 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+// WinRTIO.cpp: UWP C-style file I/O wrapper for SDLPal.
+// Author: Lou Yihua @ 2016-2017
 //
 
 #include <wrl.h>
@@ -157,6 +157,10 @@ errno_t WRT_fopen_s(WRT_FILE ** pFile, const char * _Filename, const char * _Mod
 		if (g_specialFiles.find(_Filename) != g_specialFiles.end())
 		{
 			*pFile = new WRT_FILE(AWait(g_specialFiles[_Filename]->OpenAsync(w ? Windows::Storage::FileAccessMode::ReadWrite : Windows::Storage::FileAccessMode::Read), eventHandle), r, w, b);
+			if (*_Mode == 'a')
+			{
+				(*pFile)->stream->Seek(LARGE_INTEGER{ 0,0 }, STREAM_SEEK_END, nullptr);
+			}
 			return 0;
 		}
 
@@ -215,6 +219,10 @@ errno_t WRT_fopen_s(WRT_FILE ** pFile, const char * _Filename, const char * _Mod
 		if (file)
 		{
 			*pFile = new WRT_FILE(AWait(file->OpenAsync(w ? Windows::Storage::FileAccessMode::ReadWrite : Windows::Storage::FileAccessMode::Read), eventHandle), r, w, b);
+			if (*_Mode == 'a')
+			{
+				(*pFile)->stream->Seek(LARGE_INTEGER{ 0,0 }, STREAM_SEEK_END, nullptr);
+			}
 		}
 	}
 	catch (Platform::AccessDeniedException^)

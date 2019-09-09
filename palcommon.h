@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -100,13 +100,6 @@ typedef enum tagMUSICTYPE
 	MUSIC_OGG,
 	MUSIC_SDLCD
 } MUSICTYPE, *LPMUSICTYPE;
-
-typedef enum tagOPLTYPE
-{
-	OPL_DOSBOX,
-	OPL_MAME,
-	OPL_DOSBOX_NEW,
-} OPLTYPE, *LPOPLTYPE;
 
 typedef enum tagCODEPAGE {
 	CP_MIN = 0,
@@ -274,5 +267,19 @@ PAL_C_LINKAGE_END
       PAL_ProcessEvent(); \
       SDL_Delay(1); \
    }
+
+#if SDL_VERSION_ATLEAST(2,0,0)
+#define PAL_DelayUntilPC(t) \
+   PAL_ProcessEvent(); \
+   while (SDL_GetPerformanceCounter() < (t)) \
+   { \
+      PAL_ProcessEvent(); \
+      SDL_Delay(1); \
+   }
+#else
+#define SDL_GetPerformanceFrequency() (1000)
+#define SDL_GetPerformanceCounter SDL_GetTicks
+#define PAL_DelayUntilPC PAL_DelayUntil
+#endif
 
 #endif // _PALUTILS_H

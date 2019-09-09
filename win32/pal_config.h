@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -62,9 +62,21 @@
 
 #ifndef __MINGW__
 #define strtok_r strtok_s
+#define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #define strdup _strdup //https://msdn.microsoft.com/en-us/library/ms235454(v=vs.140).aspx 
 #endif
 
-PAL_C_LINKAGE char* stoupper(char* s);
-#define strcasestr(a,b) strstr(stoupper((a)),stoupper((b)))
+PAL_C_LINKAGE char* strcasestr(const char *, const char *);
+#define PAL_NEED_STRCASESTR 1
+
+#define PAL_HAS_GLSL 1
+
+#define PAL_HAS_PLATFORM_STARTUP 1
+
+#ifdef __MINGW__
+#define PAL_CONVERT_UTF8 SDL_iconv_utf8_locale
+#endif
+
+#include <malloc.h>
+#include <stdbool.h>

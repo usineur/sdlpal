@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -21,6 +21,8 @@
 //
 
 #include "main.h"
+
+static BOOL __buymenu_firsttime_render;
 
 static WORD GetSavedTimes(int iSaveSlot)
 {
@@ -744,7 +746,8 @@ PAL_InGameMagicMenu(
             gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess =
                PAL_RunTriggerScript(gpGlobals->g.rgObject[wMagic].magic.wScriptOnSuccess, 0);
 
-            gpGlobals->g.PlayerRoles.rgwMP[gpGlobals->rgParty[w].wPlayerRole] -=
+            if(g_fScriptSuccess)
+               gpGlobals->g.PlayerRoles.rgwMP[gpGlobals->rgParty[w].wPlayerRole] -=
                gpGlobals->g.lprgMagic[gpGlobals->g.rgObject[wMagic].magic.wMagicNumber].wCostMP;
          }
 
@@ -893,8 +896,8 @@ PAL_InventoryMenu(
    MENUITEM        rgMenuItem[2] =
    {
       // value  label                     enabled   pos
-      { 1,      INVMENU_LABEL_USE,        TRUE,     PAL_XY(43, 73) },
-      { 2,      INVMENU_LABEL_EQUIP,      TRUE,     PAL_XY(43, 73 + 18) },
+      { 1,      INVMENU_LABEL_EQUIP,      TRUE,     PAL_XY(43, 73) },
+      { 2,      INVMENU_LABEL_USE,        TRUE,     PAL_XY(43, 73 + 18) },
    };
 
    PAL_CreateBox(PAL_XY(30, 60), 1, PAL_MenuTextMaxWidth(rgMenuItem, sizeof(rgMenuItem)/sizeof(MENUITEM)) - 1, 0, FALSE);
@@ -905,11 +908,11 @@ PAL_InventoryMenu(
    switch (w)
    {
    case 1:
-      PAL_GameUseItem();
+      PAL_GameEquipItem();
       break;
 
    case 2:
-      PAL_GameEquipItem();
+      PAL_GameUseItem();
       break;
    }
 }
@@ -1517,6 +1520,8 @@ PAL_BuyMenu_OnItemChange(
    int                 i, n;
    PAL_LARGE BYTE      bufImage[2048];
 
+   if( __buymenu_firsttime_render )
+      PAL_RLEBlitToSurfaceWithShadow(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen, PAL_XY(35+6, 8+6), TRUE);
    //
    // Draw the picture of current selected item
    //
@@ -1526,6 +1531,8 @@ PAL_BuyMenu_OnItemChange(
    if (PAL_MKFReadChunk(bufImage, 2048,
       gpGlobals->g.rgObject[wCurrentItem].item.wBitmap, gpGlobals->f.fpBALL) > 0)
    {
+      if( __buymenu_firsttime_render )
+         PAL_RLEBlitToSurfaceWithShadow(bufImage, gpScreen, PAL_XY(42+6, 16+6), TRUE);
       PAL_RLEBlitToSurface(bufImage, gpScreen, PAL_XY(42, 16));
    }
 
@@ -1547,21 +1554,29 @@ PAL_BuyMenu_OnItemChange(
       }
    }
 
+   if( __buymenu_firsttime_render )
+      PAL_CreateSingleLineBoxWithShadow(PAL_XY(20, 105), 5, FALSE, 6);
+   else
    //
    // Draw the amount of this item in the inventory
    //
-   PAL_CreateSingleLineBox(PAL_XY(20, 105), 5, FALSE);
+   PAL_CreateSingleLineBoxWithShadow(PAL_XY(20, 105), 5, FALSE, 0);
    PAL_DrawText(PAL_GetWord(BUYMENU_LABEL_CURRENT), PAL_XY(30, 115), 0, FALSE, FALSE, FALSE);
    PAL_DrawNumber(n, 6, PAL_XY(69, 119), kNumColorYellow, kNumAlignRight);
 
+   if( __buymenu_firsttime_render )
+      PAL_CreateSingleLineBoxWithShadow(PAL_XY(20, 145), 5, FALSE, 6);
+   else
    //
    // Draw the cash amount
    //
-   PAL_CreateSingleLineBox(PAL_XY(20, 145), 5, FALSE);
+   PAL_CreateSingleLineBoxWithShadow(PAL_XY(20, 145), 5, FALSE, 0);
    PAL_DrawText(PAL_GetWord(CASH_LABEL), PAL_XY(30, 155), 0, FALSE, FALSE, FALSE);
    PAL_DrawNumber(gpGlobals->dwCash, 6, PAL_XY(69, 159), kNumColorYellow, kNumAlignRight);
 
    VIDEO_UpdateScreen(&rect);
+   
+   __buymenu_firsttime_render = FALSE;
 }
 
 VOID
@@ -1625,6 +1640,7 @@ PAL_BuyMenu(
    VIDEO_UpdateScreen(&rect);
 
    w = 0;
+   __buymenu_firsttime_render = TRUE;
 
    while (TRUE)
    {

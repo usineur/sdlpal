@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -22,6 +22,11 @@
 
 #include "main.h"
 #include <setjmp.h>
+
+#if defined(PAL_HAS_GIT_REVISION)
+# undef PAL_GIT_REVISION
+# include "generated.h"
+#endif
 
 static jmp_buf g_exit_jmp_buf;
 static int g_exit_code = 0;
@@ -53,14 +58,9 @@ PAL_Init(
 --*/
 {
    int           e;
-
-   //
-   // Initialize defaults, video and audio
-   //
-   if (SDL_Init(PAL_SDL_INIT_FLAGS) == -1)
-   {
-      TerminateOnError("Could not initialize SDL: %s.\n", SDL_GetError());
-   }
+#if PAL_HAS_GIT_REVISION
+   UTIL_LogOutput(LOGLEVEL_DEBUG, "SDLPal build revision: %s\n", PAL_GIT_REVISION);
+#endif
 
    //
    // Initialize subsystems.
@@ -103,7 +103,7 @@ PAL_Init(
    PAL_AVIInit();
 
    VIDEO_SetWindowTitle(UTIL_va(UTIL_GlobalBuffer(0), PAL_GLOBAL_BUFFER_SIZE,
-	   "Pal %s%s%s",
+	   "Pal %s%s%s%s",
 	   gConfig.fIsWIN95 ? "Win95" : "DOS",
 #if defined(_DEBUG) || defined(DEBUG)
 	   " (Debug) ",
@@ -115,6 +115,7 @@ PAL_Init(
 #else
 	   ""
 #endif
+       ,(gConfig.fEnableGLSL && gConfig.pszShader ? gConfig.pszShader : "")
    ));
 }
 
@@ -141,16 +142,26 @@ PAL_Shutdown(
    PAL_AVIShutdown();
    PAL_FreeFont();
    PAL_FreeResources();
-   PAL_FreeGlobals();
    PAL_FreeUI();
    PAL_FreeText();
    PAL_ShutdownInput();
    VIDEO_Shutdown();
-
-   SDL_Quit();
+   
+   //
+   // global needs be free in last
+   // since subsystems may needs config content during destroy
+   // which also cleared here
+   //
+   PAL_FreeGlobals();
 
    g_exit_code = exit_code;
+#if !__EMSCRIPTEN__
    longjmp(g_exit_jmp_buf, 1);
+#else
+   SDL_Quit();
+   UTIL_Platform_Quit();
+   return;
+#endif
 }
 
 VOID
@@ -175,7 +186,7 @@ PAL_TrademarkScreen(
    if (PAL_PlayAVI("1.avi")) return;
 
    PAL_SetPalette(3, FALSE);
-   PAL_RNGPlay(6, 0, 1000, 25);
+   PAL_RNGPlay(6, 0, -1, 25);
    UTIL_Delay(1000);
    PAL_FadeOut(1);
 }
@@ -459,14 +470,25 @@ main(
    UTIL_Platform_Startup(argc,argv);
 #endif
 
+#if !__EMSCRIPTEN__
    if (setjmp(g_exit_jmp_buf) != 0)
    {
 	   // A longjmp is made, should exit here
+	   SDL_Quit();
 	   UTIL_Platform_Quit();
 	   return g_exit_code;
    }
+#endif
 
 #if !defined(UNIT_TEST) || defined(UNIT_TEST_GAME_INIT)
+   //
+   // Initialize SDL
+   //
+   if (SDL_Init(PAL_SDL_INIT_FLAGS) == -1)
+   {
+	   TerminateOnError("Could not initialize SDL: %s.\n", SDL_GetError());
+   }
+
    PAL_LoadConfig(TRUE);
 
    //

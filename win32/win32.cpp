@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -25,7 +25,6 @@
 
 #define UNICODE
 #define _UNICODE
-#define _CRT_SECURE_NO_WARNINGS
 
 #include <tchar.h>
 #include <windows.h>
@@ -38,12 +37,9 @@
 #include "../palcfg.h"
 #include "../resampler.h"
 
-PAL_C_LINKAGE char* stoupper(char* s)
-{
-	char* p = strdup(s);
-	while (*p = toupper(*p)) p++;
-	return s;
-}
+#ifndef GCLP_HICON
+# define GCLP_HICON (-14)
+#endif
 
 #define ComboBox_AddString(hwndDlg, idCtrl, lpsz) \
             (BOOL)SNDMSG(GetDlgItem((hwndDlg), (idCtrl)), CB_ADDSTRING, (WPARAM)(0), (LPARAM)(lpsz))
@@ -115,7 +111,7 @@ void SaveSettings(HWND hwndDlg, BOOL fWriteFile)
 {
 	int textLen;
 
-	if (IsDlgButtonChecked(hwndDlg, IDC_USEMSGFILE) && (textLen = GetWindowTextLengthA(GetDlgItem(hwndDlg, IDC_MSGFILE))) > 0)
+	if (IsDlgButtonChecked(hwndDlg, IDC_USEMSGFILE) == BST_CHECKED && (textLen = GetWindowTextLengthA(GetDlgItem(hwndDlg, IDC_MSGFILE))) > 0)
 	{
 		gConfig.pszMsgFile = (char*)realloc(gConfig.pszMsgFile, textLen + 1);
 		GetDlgItemTextA(hwndDlg, IDC_MSGFILE, gConfig.pszMsgFile, textLen + 1);
@@ -125,7 +121,7 @@ void SaveSettings(HWND hwndDlg, BOOL fWriteFile)
 		free(gConfig.pszMsgFile); gConfig.pszMsgFile = nullptr;
 	}
 
-	if (IsDlgButtonChecked(hwndDlg, IDC_USELOGFILE) && (textLen = GetWindowTextLengthA(GetDlgItem(hwndDlg, IDC_LOGFILE))) > 0)
+	if (IsDlgButtonChecked(hwndDlg, IDC_USELOGFILE) == BST_CHECKED && (textLen = GetWindowTextLengthA(GetDlgItem(hwndDlg, IDC_LOGFILE))) > 0)
 	{
 		gConfig.pszLogFile = (char*)realloc(gConfig.pszLogFile, textLen + 1);
 		GetDlgItemTextA(hwndDlg, IDC_LOGFILE, gConfig.pszLogFile, textLen + 1);
@@ -135,7 +131,7 @@ void SaveSettings(HWND hwndDlg, BOOL fWriteFile)
 		free(gConfig.pszLogFile); gConfig.pszLogFile = nullptr;
 	}
 
-	if (IsDlgButtonChecked(hwndDlg, IDC_USEFONTFILE) && (textLen = GetWindowTextLengthA(GetDlgItem(hwndDlg, IDC_FONTFILE))) > 0)
+	if (IsDlgButtonChecked(hwndDlg, IDC_USEFONTFILE) == BST_CHECKED && (textLen = GetWindowTextLengthA(GetDlgItem(hwndDlg, IDC_FONTFILE))) > 0)
 	{
 		gConfig.pszFontFile = (char*)realloc(gConfig.pszFontFile, textLen + 1);
 		GetDlgItemTextA(hwndDlg, IDC_FONTFILE, gConfig.pszFontFile, textLen + 1);
@@ -155,13 +151,30 @@ void SaveSettings(HWND hwndDlg, BOOL fWriteFile)
 		free(gConfig.pszGamePath); gConfig.pszGamePath = nullptr;
 	}
 
-	gConfig.fFullScreen = IsDlgButtonChecked(hwndDlg, IDC_FULLSCREEN);
-	gConfig.fUseTouchOverlay = IsDlgButtonChecked(hwndDlg, IDC_TOUCHOVERLAY);
-	gConfig.fEnableAviPlay = IsDlgButtonChecked(hwndDlg, IDC_ENABLEAVI);
-	gConfig.fKeepAspectRatio = IsDlgButtonChecked(hwndDlg, IDC_ASPECTRATIO);
+	if (IsDlgButtonChecked(hwndDlg, IDC_GLSL) == BST_CHECKED && (textLen = GetWindowTextLength(GetDlgItem(hwndDlg, IDC_SHADERFILE))) > 0)
+	{
+		gConfig.pszShader = (char*)realloc(gConfig.pszShader, textLen + 1);
+		GetDlgItemTextA(hwndDlg, IDC_SHADERFILE, gConfig.pszShader, textLen + 1);
+	}
+	else
+	{
+		free(gConfig.pszShader); gConfig.pszShader = nullptr;
+	}
+
+	gConfig.fFullScreen = IsDlgButtonChecked(hwndDlg, IDC_FULLSCREEN) == BST_CHECKED;
+	gConfig.fUseTouchOverlay = IsDlgButtonChecked(hwndDlg, IDC_TOUCHOVERLAY) == BST_CHECKED;
+	gConfig.fEnableAviPlay = IsDlgButtonChecked(hwndDlg, IDC_ENABLEAVI) == BST_CHECKED;
+	gConfig.fKeepAspectRatio = IsDlgButtonChecked(hwndDlg, IDC_ASPECTRATIO) == BST_CHECKED;
+	gConfig.fEnableGLSL = IsDlgButtonChecked(hwndDlg, IDC_GLSL) == BST_CHECKED;
+	gConfig.fEnableHDR = IsDlgButtonChecked(hwndDlg, IDC_HDR) == BST_CHECKED;
+	gConfig.dwTextureWidth = GetDlgItemInt(hwndDlg, IDC_TEXTUREWIDTH, nullptr, FALSE);
+	gConfig.dwTextureHeight = GetDlgItemInt(hwndDlg, IDC_TEXTUREHEIGHT, nullptr, FALSE);
+	gConfig.dwScreenWidth = GetDlgItemInt(hwndDlg, IDC_WINDOWWIDTH, nullptr, FALSE);
+	gConfig.dwScreenHeight = GetDlgItemInt(hwndDlg, IDC_WINDOWHEIGHT, nullptr, FALSE);
 	gConfig.eCDType = (MUSICTYPE)(ComboBox_GetCurSel(hwndDlg, IDC_CD) + MUSIC_MP3);
 	gConfig.eMusicType = (MUSICTYPE)ComboBox_GetCurSel(hwndDlg, IDC_BGM);
-	gConfig.eOPLType = (OPLTYPE)(ComboBox_GetCurSel(hwndDlg, IDC_OPL));
+	gConfig.eOPLCore = (OPLCORE_TYPE)(ComboBox_GetCurSel(hwndDlg, IDC_OPL_CORE));
+	gConfig.eOPLChip = (OPLCHIP_TYPE)(gConfig.eOPLCore == OPLCORE_NUKED ? OPLCHIP_OPL3 : ComboBox_GetCurSel(hwndDlg, IDC_OPL_CHIP));
 	gConfig.iLogLevel = (LOGLEVEL)(ComboBox_GetCurSel(hwndDlg, IDC_LOGLEVEL));
 	gConfig.iAudioChannels = IsDlgButtonChecked(hwndDlg, IDC_STEREO) ? 2 : 1;
 	gConfig.iSampleRate = GetDlgItemInt(hwndDlg, IDC_SAMPLERATE, nullptr, FALSE);
@@ -183,37 +196,53 @@ void ResetControls(HWND hwndDlg)
 {
 	TCHAR buffer[100];
 
-	EnableDlgItem(hwndDlg, IDC_OPL, gConfig.eMusicType == MUSIC_RIX);
-	EnableDlgItem(hwndDlg, IDC_SURROUNDOPL, gConfig.eMusicType == MUSIC_RIX);
-	EnableDlgItem(hwndDlg, IDC_OPLSR, gConfig.eMusicType == MUSIC_RIX);
+	EnableDlgItem(hwndDlg, IDC_OPL_CORE, gConfig.eMusicType == MUSIC_RIX ? TRUE : FALSE);
+	EnableDlgItem(hwndDlg, IDC_OPL_CHIP, gConfig.eMusicType == MUSIC_RIX ? TRUE : FALSE);
+	EnableDlgItem(hwndDlg, IDC_SURROUNDOPL, gConfig.eMusicType == MUSIC_RIX ? TRUE : FALSE);
+	EnableDlgItem(hwndDlg, IDC_OPLSR, gConfig.eMusicType == MUSIC_RIX ? TRUE : FALSE);
 
-	CheckDlgButton(hwndDlg, IDC_FULLSCREEN, gConfig.fFullScreen);
-	CheckDlgButton(hwndDlg, IDC_TOUCHOVERLAY, gConfig.fUseTouchOverlay);
-	CheckDlgButton(hwndDlg, IDC_ENABLEAVI, gConfig.fEnableAviPlay);
-	CheckDlgButton(hwndDlg, IDC_ASPECTRATIO, gConfig.fKeepAspectRatio);
-	CheckDlgButton(hwndDlg, IDC_SURROUNDOPL, gConfig.fUseSurroundOPL);
-	CheckDlgButton(hwndDlg, IDC_STEREO, gConfig.iAudioChannels == 2);
+	CheckDlgButton(hwndDlg, IDC_FULLSCREEN, gConfig.fFullScreen ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_TOUCHOVERLAY, gConfig.fUseTouchOverlay ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_ENABLEAVI, gConfig.fEnableAviPlay ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_ASPECTRATIO, gConfig.fKeepAspectRatio ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_SURROUNDOPL, gConfig.fUseSurroundOPL ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_STEREO, gConfig.iAudioChannels == 2 ? BST_CHECKED : BST_UNCHECKED);
 
-	CheckDlgButton(hwndDlg, IDC_USEMSGFILE, gConfig.pszMsgFile != nullptr);
-	EnableDlgItem(hwndDlg, IDC_BRMSG, gConfig.pszMsgFile != nullptr);
-	CheckDlgButton(hwndDlg, IDC_USEFONTFILE, gConfig.pszFontFile != nullptr);
-	EnableDlgItem(hwndDlg, IDC_BRFONT, gConfig.pszFontFile != nullptr);
-	CheckDlgButton(hwndDlg, IDC_USELOGFILE, gConfig.pszLogFile != nullptr);
-	EnableDlgItem(hwndDlg, IDC_BRLOG, gConfig.pszLogFile != nullptr);
+	CheckDlgButton(hwndDlg, IDC_USEMSGFILE, gConfig.pszMsgFile ? BST_CHECKED : BST_UNCHECKED);
+	EnableDlgItem(hwndDlg, IDC_BRMSG, gConfig.pszMsgFile ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_USEFONTFILE, gConfig.pszFontFile ? BST_CHECKED : BST_UNCHECKED);
+	EnableDlgItem(hwndDlg, IDC_BRFONT, gConfig.pszFontFile ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_USELOGFILE, gConfig.pszLogFile ? BST_CHECKED : BST_UNCHECKED);
+	EnableDlgItem(hwndDlg, IDC_BRLOG, gConfig.pszLogFile ? BST_CHECKED : BST_UNCHECKED);
+
+	CheckDlgButton(hwndDlg, IDC_GLSL, gConfig.fEnableGLSL ? BST_CHECKED : BST_UNCHECKED);
+	CheckDlgButton(hwndDlg, IDC_HDR, gConfig.fEnableHDR ? BST_CHECKED : BST_UNCHECKED);
+	SetDlgItemText(hwndDlg, IDC_TEXTUREWIDTH, _itot(gConfig.dwTextureWidth, buffer, 10));
+	SetDlgItemText(hwndDlg, IDC_TEXTUREHEIGHT, _itot(gConfig.dwTextureHeight, buffer, 10));
+	EnableDlgItem(hwndDlg, IDC_HDR, gConfig.fEnableGLSL ? TRUE : FALSE);
+	EnableDlgItem(hwndDlg, IDC_TEXTUREWIDTH, gConfig.fEnableGLSL ? TRUE : FALSE);
+	EnableDlgItem(hwndDlg, IDC_TEXTUREHEIGHT, gConfig.fEnableGLSL ? TRUE : FALSE);
+	EnableDlgItem(hwndDlg, IDC_BRSHADER, gConfig.fEnableGLSL ? TRUE : FALSE);
 
 	ComboBox_SetCurSel(hwndDlg, IDC_CD, gConfig.eCDType - MUSIC_MP3);
 	ComboBox_SetCurSel(hwndDlg, IDC_BGM, gConfig.eMusicType);
-	ComboBox_SetCurSel(hwndDlg, IDC_OPL, gConfig.eOPLType);
+	ComboBox_SetCurSel(hwndDlg, IDC_OPL_CORE, gConfig.eOPLCore);
+	ComboBox_SetCurSel(hwndDlg, IDC_OPL_CHIP, gConfig.eOPLChip);
 	ComboBox_SetCurSel(hwndDlg, IDC_LOGLEVEL, gConfig.iLogLevel);
 
 	SetDlgItemText(hwndDlg, IDC_SAMPLERATE, _itot(gConfig.iSampleRate, buffer, 10));
 	SetDlgItemText(hwndDlg, IDC_OPLSR, _itot(gConfig.iOPLSampleRate, buffer, 10));
 	SetDlgItemText(hwndDlg, IDC_AUDIOBUFFER, _itot(gConfig.wAudioBufferSize, buffer, 10));
+	SetDlgItemText(hwndDlg, IDC_WINDOWWIDTH, _itot(gConfig.dwScreenWidth, buffer, 10));
+	SetDlgItemText(hwndDlg, IDC_WINDOWHEIGHT, _itot(gConfig.dwScreenHeight, buffer, 10));
+	SetDlgItemText(hwndDlg, IDC_TEXTUREWIDTH, _itot(gConfig.dwTextureWidth, buffer, 10));
+	SetDlgItemText(hwndDlg, IDC_TEXTUREHEIGHT, _itot(gConfig.dwTextureHeight, buffer, 10));
 
 	if (gConfig.pszGamePath) SetDlgItemTextA(hwndDlg, IDC_GAMEPATH, gConfig.pszGamePath);
 	if (gConfig.pszMsgFile) SetDlgItemTextA(hwndDlg, IDC_MSGFILE, gConfig.pszMsgFile);
 	if (gConfig.pszFontFile) SetDlgItemTextA(hwndDlg, IDC_FONTFILE, gConfig.pszFontFile);
 	if (gConfig.pszLogFile) SetDlgItemTextA(hwndDlg, IDC_LOGFILE, gConfig.pszLogFile);
+	if (gConfig.pszShader) SetDlgItemTextA(hwndDlg, IDC_SHADERFILE, gConfig.pszShader);
 
 	TrackBar_SetPos(hwndDlg, IDC_QUALITY, gConfig.iResampleQuality, TRUE);
 	TrackBar_SetPos(hwndDlg, IDC_MUSICVOLUME, gConfig.iMusicVolume, TRUE);
@@ -223,6 +252,7 @@ void ResetControls(HWND hwndDlg)
 INT_PTR InitProc(HWND hwndDlg, HWND hwndCtrl, LPARAM lParam)
 {
 	InitCommonControls();
+	SetClassLongPtr(hwndDlg, GCLP_HICON, (LONG_PTR)LoadIcon((HINSTANCE)GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_SDLPAL)));
 
 	auto log_levels = LoadResourceString(IDC_LOGLEVEL);
 	for (size_t pos = 0; pos != std::string::npos; )
@@ -253,9 +283,14 @@ INT_PTR InitProc(HWND hwndDlg, HWND hwndCtrl, LPARAM lParam)
 	ComboBox_AddString(hwndDlg, IDC_BGM, TEXT("MP3"));
 	ComboBox_AddString(hwndDlg, IDC_BGM, TEXT("OGG"));
 
-	ComboBox_AddString(hwndDlg, IDC_OPL, TEXT("DOSBOX"));
-	ComboBox_AddString(hwndDlg, IDC_OPL, TEXT("MAME"));
-	ComboBox_AddString(hwndDlg, IDC_OPL, TEXT("DOSBOXNEW"));
+	ComboBox_AddString(hwndDlg, IDC_OPL_CORE, TEXT("MAME"));
+	ComboBox_AddString(hwndDlg, IDC_OPL_CORE, TEXT("DBFLT"));
+	ComboBox_AddString(hwndDlg, IDC_OPL_CORE, TEXT("DBINT"));
+	ComboBox_AddString(hwndDlg, IDC_OPL_CORE, TEXT("NUKED"));
+	ComboBox_SetCurSel(hwndDlg, IDC_OPL_CORE, 1);
+
+	ComboBox_AddString(hwndDlg, IDC_OPL_CHIP, TEXT("OPL2"));
+	ComboBox_AddString(hwndDlg, IDC_OPL_CHIP, TEXT("OPL3"));
 
 	TrackBar_SetRange(hwndDlg, IDC_QUALITY, RESAMPLER_QUALITY_MIN, RESAMPLER_QUALITY_MAX, FALSE);
 	TrackBar_SetRange(hwndDlg, IDC_MUSICVOLUME, 0, PAL_MAX_VOLUME, FALSE);
@@ -313,6 +348,7 @@ INT_PTR ButtonProc(HWND hwndDlg, WORD idControl, HWND hwndCtrl)
 	case IDC_BRFONT:
 	case IDC_BRMSG:
 	case IDC_BRLOG:
+	case IDC_BRSHADER:
 	{
 		TCHAR szFilePath[MAX_PATH * 2] = { 0 };
 		auto filter = LoadResourceString(idControl + 1);
@@ -323,7 +359,7 @@ INT_PTR ButtonProc(HWND hwndDlg, WORD idControl, HWND hwndCtrl)
 			filter.c_str(), nullptr, 0, 0,
 			szFilePath, sizeof(szFilePath) / sizeof(TCHAR),
 			nullptr, 0, nullptr, title.c_str(),
-			OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | (idControl != IDC_BRLOG ? OFN_FILEMUSTEXIST : (DWORD)0)
+			OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | (idControl != IDC_BRLOG ? OFN_FILEMUSTEXIST : (DWORD)0) | OFN_NOCHANGEDIR
 		};
 		if (idControl == IDC_BRLOG ? GetSaveFileName(&ofn) : GetOpenFileName(&ofn))
 		{
@@ -335,7 +371,14 @@ INT_PTR ButtonProc(HWND hwndDlg, WORD idControl, HWND hwndCtrl)
 	case IDC_USEMSGFILE:
 	case IDC_USEFONTFILE:
 	case IDC_USELOGFILE:
-		EnableDlgItem(hwndDlg, idControl + 1, IsDlgButtonChecked(hwndDlg, idControl));
+		EnableDlgItem(hwndDlg, idControl + 1, IsDlgButtonChecked(hwndDlg, idControl) == BST_CHECKED ? TRUE : FALSE);
+		return TRUE;
+
+	case IDC_GLSL:
+		EnableDlgItem(hwndDlg, IDC_HDR, IsDlgButtonChecked(hwndDlg, idControl) == BST_CHECKED ? TRUE : FALSE);
+		EnableDlgItem(hwndDlg, IDC_TEXTUREWIDTH, IsDlgButtonChecked(hwndDlg, idControl) == BST_CHECKED ? TRUE : FALSE);
+		EnableDlgItem(hwndDlg, IDC_TEXTUREHEIGHT, IsDlgButtonChecked(hwndDlg, idControl) == BST_CHECKED ? TRUE : FALSE);
+		EnableDlgItem(hwndDlg, IDC_BRSHADER, IsDlgButtonChecked(hwndDlg, idControl) == BST_CHECKED ? TRUE : FALSE);
 		return TRUE;
 
 	default: return FALSE;
@@ -347,7 +390,8 @@ INT_PTR ComboBoxProc(HWND hwndDlg, WORD idControl, HWND hwndCtrl)
 	switch (idControl)
 	{
 	case IDC_BGM:
-		EnableDlgItem(hwndDlg, IDC_OPL, ComboBox_GetCurSel(hwndDlg, IDC_BGM) == MUSIC_RIX);
+		EnableDlgItem(hwndDlg, IDC_OPL_CORE, ComboBox_GetCurSel(hwndDlg, IDC_BGM) == MUSIC_RIX);
+		EnableDlgItem(hwndDlg, IDC_OPL_CHIP, ComboBox_GetCurSel(hwndDlg, IDC_BGM) == MUSIC_RIX);
 		EnableDlgItem(hwndDlg, IDC_SURROUNDOPL, ComboBox_GetCurSel(hwndDlg, IDC_BGM) == MUSIC_RIX);
 		EnableDlgItem(hwndDlg, IDC_OPLSR, ComboBox_GetCurSel(hwndDlg, IDC_BGM) == MUSIC_RIX);
 		return TRUE;
@@ -380,9 +424,12 @@ INT_PTR CALLBACK LauncherDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPAR
 
 typedef LANGID(__stdcall *GETLANGUAGEID)(void);
 
+extern "C" int UTIL_Platform_Startup(int argc, char *argv[]) {
+	return 0;
+}
+
 extern "C" int UTIL_Platform_Init(int argc, char* argv[])
 {
-	SDL_setenv("SDL_AUDIODRIVER","directsound",1);
 	// Try to get Vista+ API at runtime, and falls back to XP's API if not found
 	GETLANGUAGEID GetLanguage = (GETLANGUAGEID)GetProcAddress(GetModuleHandle(TEXT("Kernel32.dll")), "GetThreadUILanguage");
 	if (!GetLanguage) GetLanguage = GetUserDefaultLangID;

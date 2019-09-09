@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2017, SDLPAL development team.
+// Copyright (c) 2011-2019, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -424,7 +424,7 @@ PAL_EndingScreen(
 
 		if (!win_music) AUDIO_PlayMusic(0x1a, TRUE, 0);
 		PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 110, 150, 7);
-		PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 151, 999, 9);
+		PAL_RNGPlay(gpGlobals->iCurPlayingRNG, 151, -1, 9);
 
 		PAL_FadeOut(2);
 
@@ -451,14 +451,14 @@ PAL_EndingScreen(
 
 		SDL_FillRect(gpScreen, NULL, 0);
 		PAL_SetPalette(0, FALSE);
-		PAL_RNGPlay(0xb, 0, 999, 7);
+		PAL_RNGPlay(0xb, 0, -1, 7);
 
 		PAL_FadeOut(2);
 
 		SDL_FillRect(gpScreen, NULL, 0);
 		gpGlobals->wNumPalette = 8;
 		gpGlobals->fNeedToFadeIn = TRUE;
-		PAL_RNGPlay(10, 0, 999, 6);
+		PAL_RNGPlay(10, 0, -1, 6);
 
 		PAL_EndingSetEffectSprite(0);
 		PAL_ShowFBP(77, 10);

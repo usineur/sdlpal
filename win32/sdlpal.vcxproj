@@ -29,32 +29,32 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{837BDF47-9375-4C30-866B-07E262E94A01}</ProjectGuid>
     <RootNamespace>sdlpal</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -120,19 +120,20 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4244;4305;4819</DisableSpecificWarnings>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -146,18 +147,19 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4244;4305;4819</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -170,7 +172,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -178,13 +180,14 @@
       <Optimization>Disabled</Optimization>
       <DisableSpecificWarnings>4244;4305;4819</DisableSpecificWarnings>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -198,7 +201,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -212,7 +215,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>
@@ -227,19 +230,20 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <DisableSpecificWarnings>4244;4305;4819</DisableSpecificWarnings>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -252,7 +256,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>.\;..\;..\include;..\src;..\liboggvorbis\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PAL_HAS_GIT_REVISION;PAL_HAS_PLATFORM_SPECIFIC_UTILS;WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;_DEBUG;UNIT_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
@@ -264,7 +268,7 @@
       <Culture>0x0804</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;imm32.lib;version.lib;comctl32.lib;winmm.lib;sdl2.lib;sdl2main.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -285,19 +289,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\adplug\adlibemu.c" />
-    <ClCompile Include="..\adplug\dbemuopl.cpp" />
-    <ClCompile Include="..\adplug\dbopl.cpp">
-      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AnySuitable</InlineFunctionExpansion>
-      <InlineFunctionExpansion Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AnySuitable</InlineFunctionExpansion>
-      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</IntrinsicFunctions>
-      <IntrinsicFunctions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IntrinsicFunctions>
-      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Speed</FavorSizeOrSpeed>
-      <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Speed</FavorSizeOrSpeed>
-      <OmitFramePointers Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</OmitFramePointers>
-      <OmitFramePointers Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</OmitFramePointers>
-    </ClCompile>
-    <ClCompile Include="..\adplug\demuopl.cpp" />
+    <ClCompile Include="..\adplug\dosbox_opls.cpp" />
+    <ClCompile Include="..\adplug\mame_opls.cpp" />
+    <ClCompile Include="..\adplug\nuked_opl.c" />
     <ClCompile Include="..\audio.c" />
     <ClCompile Include="..\aviplay.c" />
     <ClCompile Include="..\battle.c" />
@@ -306,6 +300,7 @@
     <ClCompile Include="..\font.c" />
     <ClCompile Include="..\game.c" />
     <ClCompile Include="..\global.c" />
+    <ClCompile Include="..\glslp.c" />
     <ClCompile Include="..\input.c" />
     <ClCompile Include="..\itemmenu.c" />
     <ClCompile Include="..\liboggvorbis\src\analysis.c" />
@@ -368,15 +363,15 @@
     <ClCompile Include="..\uigame.c" />
     <ClCompile Include="..\util.c" />
     <ClCompile Include="..\video.c" />
+    <ClCompile Include="..\video_glsl.c" />
+    <ClCompile Include="..\mini_glloader.c" />
     <ClCompile Include="..\yj1.c" />
     <ClCompile Include="..\adplug\binfile.cpp" />
     <ClCompile Include="..\adplug\binio.cpp" />
-    <ClCompile Include="..\adplug\dosbox_opl.cpp" />
-    <ClCompile Include="..\adplug\emuopl.cpp" />
-    <ClCompile Include="..\adplug\fmopl.c" />
     <ClCompile Include="..\adplug\fprovide.cpp" />
     <ClCompile Include="..\adplug\player.cpp" />
     <ClCompile Include="..\adplug\rix.cpp" />
+    <ClCompile Include="..\adplug\emuopls.cpp" />
     <ClCompile Include="..\adplug\surroundopl.cpp" />
     <ClCompile Include="..\native_midi\native_midi_common.c" />
     <ClCompile Include="..\libmad\bit.c" />
@@ -394,15 +389,31 @@
     <ClCompile Include="win32.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\adplug\adlibemu.h" />
-    <ClInclude Include="..\adplug\dbemuopl.h" />
-    <ClInclude Include="..\adplug\dbopl.h" />
-    <ClInclude Include="..\adplug\kemuopl.h" />
+    <ClInclude Include="..\adplug\dosbox\dbopl.cpp.h" />
+    <ClInclude Include="..\adplug\dosbox\dbopl.h" />
+    <ClInclude Include="..\adplug\dosbox\dosbox.h" />
+    <ClInclude Include="..\adplug\dosbox\opl.cpp.h" />
+    <ClInclude Include="..\adplug\dosbox_opls.h" />
+    <ClInclude Include="..\adplug\dosbox\opl.h" />
+    <ClInclude Include="..\adplug\mame\fmopl.cpp.h" />
+    <ClInclude Include="..\adplug\mame\ymf262.cpp.h" />
+    <ClInclude Include="..\adplug\mame_opls.h" />
+    <ClInclude Include="..\adplug\emuopls.h" />
+    <ClInclude Include="..\adplug\convertopl.h" />
+    <ClInclude Include="..\adplug\mame\fmopl.h" />
+    <ClInclude Include="..\adplug\mame\mame.h" />
+    <ClInclude Include="..\adplug\mame\ymf262.h" />
+    <ClInclude Include="..\adplug\nuked\opl3.c.h" />
+    <ClInclude Include="..\adplug\nuked\opl3.h" />
+    <ClInclude Include="..\adplug\nuked_opl.h" />
+    <ClInclude Include="..\adplug\opltypes.h" />
     <ClInclude Include="..\ascii.h" />
     <ClInclude Include="..\aviplay.h" />
     <ClInclude Include="..\battle.h" />
     <ClInclude Include="..\codepage.h" />
     <ClInclude Include="..\common.h" />
+    <ClInclude Include="..\defines.h" />
+    <ClInclude Include="..\glslp.h" />
     <ClInclude Include="..\liboggvorbis\include\ogg\config_types.h" />
     <ClInclude Include="..\ending.h" />
     <ClInclude Include="..\fight.h" />
@@ -463,6 +474,7 @@
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\map.h" />
     <ClInclude Include="..\midi.h" />
+    <ClInclude Include="..\mini_glloader.h" />
     <ClInclude Include="..\palcfg.h" />
     <ClInclude Include="..\palcommon.h" />
     <ClInclude Include="..\palette.h" />
@@ -483,10 +495,6 @@
     <ClInclude Include="..\video.h" />
     <ClInclude Include="..\adplug\binfile.h" />
     <ClInclude Include="..\adplug\binio.h" />
-    <ClInclude Include="..\adplug\demuopl.h" />
-    <ClInclude Include="..\adplug\dosbox_opl.h" />
-    <ClInclude Include="..\adplug\emuopl.h" />
-    <ClInclude Include="..\adplug\fmopl.h" />
     <ClInclude Include="..\adplug\fprovide.h" />
     <ClInclude Include="..\adplug\opl.h" />
     <ClInclude Include="..\adplug\player.h" />
@@ -508,12 +516,13 @@
     <ClInclude Include="..\libmad\stream.h" />
     <ClInclude Include="..\libmad\synth.h" />
     <ClInclude Include="..\libmad\timer.h" />
+    <ClInclude Include="..\video_glsl.h" />
     <ClInclude Include="pal_config.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="..\generated.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\sdlpal.cfg.example" />
+    <None Include="..\docs\sdlpal.cfg.example" />
     <None Include="..\sdlpal.ico" />
     <None Include="..\libmad\D.dat" />
     <None Include="..\libmad\imdct_s.dat" />
@@ -522,7 +531,14 @@
     <None Include="..\libmad\sf_table.dat" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="sdlpal.rc" />
+    <ResourceCompile Include="sdlpal.rc" >
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Test|x64'">..</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..</AdditionalIncludeDirectories>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\AUTHORS.txt" />

@@ -17,8 +17,9 @@
     <string name="title_settings">設定模式</string>
     <string name="label_sfxvol">音效音量</string>
     <string name="label_musvol">音樂音量</string>
-    <string name="label_opl">OPL模擬器</string>
-    <string name="label_oplrate">OPL模擬器取樣速率</string>
+    <string name="label_oplrate">OPL 模擬器取樣速率</string>
+    <string name="label_oplcore">OPL 模擬核心</string>
+    <string name="label_oplchip">OPL 模拟晶片</string>
     <string name="msg_crash">上次程式異常退出，已顯示設定頁供您檢查設定是否正確。</string>
     <string name="msg_empty">必須指定遊戲資料檔所在資料夾！</string>
     <string name="msg_exit">您的設定已保存，下次開啟時將直接開始遊戲。在遊戲中，您可以通過「系統」功能表的「返回設定」項回到本設定頁。</string>
@@ -32,4 +33,8 @@
     <string name="msg_data_not_found_header">無法在以下資料夾中找到遊戲資料檔:</string>
     <string name="msg_data_not_found_footer">說明：為防止侵害大宇公司版權，恕不提供遊戲資料檔。请自行將正版PAL的資料檔復製到手機中。</string>
     <string name="label_aspectratio">縱橫比</string>
+    <string name="enable_glsl">啟用GLSL</string>
+    <string name="enable_hdr">啟用HDR</string>
+    <string name="texture_width">紋理寬度</string>
+    <string name="texture_height">紋理高度</string>
 </resources>
