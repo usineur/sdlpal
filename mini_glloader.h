@@ -36,15 +36,20 @@
 #define GL_GLEXT_PROTOTYPES
 #endif
 #include <SDL_video.h>
+#ifdef __SWITCH__
+#include <GLES3/gl3.h>
+#include <GLES3/gl32.h>
+#else
 #include <SDL_opengl.h>
 #endif
+#endif
 
-#if __IOS__ || __ANDROID__ || __EMSCRIPTEN__ || __WINRT__ || SDL_VIDEO_DRIVER_RPI
+#if __IOS__ || __ANDROID__ || __EMSCRIPTEN__ || __WINRT__ || SDL_VIDEO_DRIVER_RPI || __SWITCH__
 #define GLES 1
 #undef FORCE_OPENGL_CORE_PROFILE
 #endif
 
-#if !defined(__APPLE__)
+#if !defined(__APPLE__) && !defined(__SWITCH__)
 
 //avoid manually imported glfuncs conflicts with platform-builtin ones, like emscripten
 #define glCreateShader _glCreateShader

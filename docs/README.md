@@ -168,6 +168,16 @@ make
 ```
 You need to have *DevkitPro PPC* and *SDL 1.2* for Wii portlib installed.
 
+Nintendo Switch
+---------------
+
+To build the game, please go to the root of the source code tree and type:
+```shell
+cd switch
+make
+```
+You need to have *DevkitPro A64* and *SDL 2.0* for Switch portlib installed.
+
 PS Vita
 -------
 

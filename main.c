@@ -468,7 +468,11 @@ main(
 
 --*/
 {
-#if !defined( __EMSCRIPTEN__ ) && !defined(__WINRT__)
+#ifdef __SWITCH__
+   socketInitializeDefault();
+   nxlinkStdio();
+#endif
+#if !defined( __EMSCRIPTEN__ ) && !defined(__WINRT__) && !defined(__SWITCH__)
    memset(gExecutablePath,0,PAL_MAX_PATH);
    strncpy(gExecutablePath, argv[0], PAL_MAX_PATH);
 #endif
@@ -483,6 +487,9 @@ main(
 	   // A longjmp is made, should exit here
 	   SDL_Quit();
 	   UTIL_Platform_Quit();
+#ifdef __SWITCH__
+	   socketExit();
+#endif
 	   return g_exit_code;
    }
 #endif

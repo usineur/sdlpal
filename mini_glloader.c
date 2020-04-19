@@ -26,6 +26,8 @@
 #if PAL_HAS_GLSL
 #include "mini_glloader.h"
 
+#ifndef __SWITCH__
+
 PFNGLCREATESHADERPROC glCreateShader;
 PFNGLSHADERSOURCEPROC glShaderSource;
 PFNGLCOMPILESHADERPROC glCompileShader;
@@ -98,5 +100,6 @@ int initGLExtensions(int major) {
     glBindBuffer && glBufferData && glBufferSubData && glGetAttribLocation &&
     glEnableVertexAttribArray && glVertexAttribPointer && glUniformMatrix4fv;
 }
+#endif
 #endif
 #endif

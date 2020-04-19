@@ -945,7 +945,7 @@ void VIDEO_GLSL_Init() {
 #   endif
 #endif
     
-#if SDL_VIDEO_DRIVER_RPI || SDL_VIDEO_DRIVER_EMSCRIPTEN || SDL_VIDEO_DRIVER_WINRT || SDL_VIDEO_DRIVER_ANDROID
+#if SDL_VIDEO_DRIVER_RPI || SDL_VIDEO_DRIVER_EMSCRIPTEN || SDL_VIDEO_DRIVER_WINRT || SDL_VIDEO_DRIVER_ANDROID || SDL_VIDEO_DRIVER_SWITCH
     manualSRGB = 1;
 #else
     //
@@ -960,6 +960,7 @@ void VIDEO_GLSL_Init() {
     Uint32 flags = PAL_VIDEO_INIT_FLAGS | (gConfig.fFullScreen ? SDL_WINDOW_BORDERLESS : 0) | SDL_WINDOW_OPENGL;
     
     UTIL_LogOutput(LOGLEVEL_DEBUG, "requesting to create window with flags: %s %s profile latest available, %s based sRGB gamma correction \n", SDL_GetHint( SDL_HINT_RENDER_DRIVER ),  get_gl_profile(get_SDL_GLAttribute(SDL_GL_CONTEXT_PROFILE_MASK)), manualSRGB ? "shader" : "framebuffer_sRGB" );
+#ifndef __SWITCH__
     gpWindow = SDL_CreateWindow("Pal", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gConfig.dwScreenWidth, gConfig.dwScreenHeight, flags);
     if (gpWindow == NULL) {
         UTIL_LogOutput(LOGLEVEL_DEBUG, "failed to create window with ordered flags! %s\n", SDL_GetError());
@@ -972,6 +973,7 @@ void VIDEO_GLSL_Init() {
         manualSRGB = 1;
         gpWindow = SDL_CreateWindow("Pal", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, gConfig.dwScreenWidth, gConfig.dwScreenHeight, flags);
     }
+#endif
 }
 
 static void dump_preset() {
@@ -998,7 +1000,7 @@ void VIDEO_GLSL_Setup() {
     char *glslversion = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
     SDL_sscanf(glversion, "%d.%d", &glversion_major, &glversion_minor);
     if(!strncmp(rendererInfo.name, "opengl", 6)) {
-#     ifndef __APPLE__
+#     if !defined(__APPLE__) && !defined(__SWITCH__)
         if (!initGLExtensions(glversion_major))
             UTIL_LogOutput(LOGLEVEL_FATAL,  "Couldn't init GL extensions!\n" );
 #     endif
