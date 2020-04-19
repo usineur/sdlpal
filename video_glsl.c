@@ -1,6 +1,6 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -492,6 +492,7 @@ SDL_Texture *load_texture(char *name, char *filename, bool filter_linear, enum w
     SDL_GL_BindTexture(texture, NULL, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, get_gl_wrap_mode(mode, type));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, get_gl_wrap_mode(mode, type));
+    SDL_FreeSurface(surf);
     return texture;
 }
 
@@ -1037,6 +1038,10 @@ void VIDEO_GLSL_Setup() {
     if(!strncmp(glslversion, "OpenGL ES GLSL ES", 17)) {
         SDL_sscanf(glslversion, "OpenGL ES GLSL ES %d.%d", &glslversion_major, &glslversion_minor);
     }
+#ifdef __EMSCRIPTEN__
+    // EDGE even on GLES3 does not support VAO. Since hard to detect, disabled totally
+    VAOSupported = 0;
+#endif
 #endif
     
     struct VertexDataFormat vData[ 4 ];

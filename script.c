@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -545,7 +545,7 @@ PAL_AdditionalCredits(
       L" ",
 	  L"    (c) 2009-2011, Wei Mingzhi",
 	  L"        <whistler_wmz@users.sf.net>.",
-      L"    (c) 2011-2019, SDLPAL Team",
+      L"    (c) 2011-2020, SDLPAL Team",
 	  L"%ls",  // Porting information line 1
 	  L"%ls",  // Porting information line 2
 	  L"%ls",  // GNU line 1
@@ -2264,7 +2264,7 @@ PAL_InterpretInstruction(
             PAL_XY(PAL_X(gpGlobals->viewport) + x, PAL_Y(gpGlobals->viewport) + y);
          gpGlobals->partyoffset = PAL_XY(160, 112);
 
-         for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
+         for (i = 0; i <= (short)gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; i++)
          {
             gpGlobals->rgParty[i].x -= x;
             gpGlobals->rgParty[i].y -= y;
@@ -2300,7 +2300,7 @@ PAL_InterpretInstruction(
                x -= PAL_X(gpGlobals->viewport);
                y -= PAL_Y(gpGlobals->viewport);
 
-               for (j = 0; j <= gpGlobals->wMaxPartyMemberIndex; j++)
+               for (j = 0; j <= (short)gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; j++)
                {
                   gpGlobals->rgParty[j].x += x;
                   gpGlobals->rgParty[j].y += y;
@@ -2313,7 +2313,7 @@ PAL_InterpretInstruction(
                gpGlobals->partyoffset =
                   PAL_XY(PAL_X(gpGlobals->partyoffset) - x, PAL_Y(gpGlobals->partyoffset) - y);
 
-               for (j = 0; j <= gpGlobals->wMaxPartyMemberIndex; j++)
+               for (j = 0; j <= (short)gpGlobals->wMaxPartyMemberIndex + gpGlobals->nFollower; j++)
                {
                   gpGlobals->rgParty[j].x -= x;
                   gpGlobals->rgParty[j].y -= y;
@@ -2671,25 +2671,28 @@ PAL_InterpretInstruction(
       //
       // Set follower of the party
       //
-      if (pScript->rgwOperand[0] > 0)
-      {
-         gpGlobals->nFollower = 1;
-         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + 1].wPlayerRole = pScript->rgwOperand[0];
-
-         PAL_SetLoadFlags(kLoadPlayerSprite);
-         PAL_LoadResources();
-
-         //
-         // Update the position and gesture for the follower
-         //
-         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + 1].x =
-            gpGlobals->rgTrail[3].x - PAL_X(gpGlobals->viewport);
-         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + 1].y =
-            gpGlobals->rgTrail[3].y - PAL_Y(gpGlobals->viewport);
-         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + 1].wFrame =
-            gpGlobals->rgTrail[3].wDirection * 3;
-      }
-      else
+      j=0;
+      for(i=0;i<2;i++)
+         if (pScript->rgwOperand[i] > 0)
+         {
+            int curFollower = j = i+1;
+            gpGlobals->nFollower = curFollower;
+            gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + curFollower].wPlayerRole = pScript->rgwOperand[i];
+            
+            PAL_SetLoadFlags(kLoadPlayerSprite);
+            PAL_LoadResources();
+            
+            //
+            // Update the position and gesture for the follower
+            //
+            gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + curFollower].x =
+            gpGlobals->rgTrail[3+i].x - PAL_X(gpGlobals->viewport);
+            gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + curFollower].y =
+            gpGlobals->rgTrail[3+i].y - PAL_Y(gpGlobals->viewport);
+            gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + curFollower].wFrame =
+            gpGlobals->rgTrail[3+i].wDirection * 3;
+         }
+      if( j == 0 )
       {
          gpGlobals->nFollower = 0;
       }
@@ -2982,10 +2985,15 @@ PAL_InterpretInstruction(
       //
       // Play CD music. Use the RIX music for fallback.
       //
-      if (!AUDIO_PlayCDTrack(pScript->rgwOperand[0]))
+      gpGlobals->wNumMusic = pScript->rgwOperand[1];
+      if (AUDIO_CD_Available())
       {
-         AUDIO_PlayMusic(pScript->rgwOperand[1], TRUE, 0);
+         int numTrack = (SHORT)pScript->rgwOperand[0];
+         if (!AUDIO_PlayCDTrack(numTrack == -1 ? -2 : numTrack))
+            AUDIO_PlayMusic(pScript->rgwOperand[1], TRUE, 0);
       }
+      else
+         AUDIO_PlayMusic(pScript->rgwOperand[1], TRUE, 0);
       break;
 
    case 0x00A4:

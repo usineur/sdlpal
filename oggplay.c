@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -64,10 +64,8 @@ typedef struct tagOGGPLAYER
 	FILE            *fp;
 	void            *resampler[2];
 	INT              iFlags;
-	INT              iMusic;
 	INT              iStage;
 	INT              nChannels;
-	BOOL             fLoop;
 	BOOL             fReady;
 	BOOL             fUseResampler;
 } OGGPLAYER, *LPOGGPLAYER;
@@ -431,12 +429,12 @@ OGG_Play(
 		player->fp = NULL;
 	}
 
+    player->iMusic = iNum;
+
 	if (iNum == -1)
 	{
 		return TRUE;
 	}
-
-	player->iMusic = iNum;
 
 	player->fp = UTIL_OpenFile(PAL_va(0, "ogg%s%.2d.ogg", PAL_NATIVE_PATH_SEPARATOR, iNum));
 	if (player->fp == NULL)

@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -602,6 +602,7 @@ UTIL_GetFullPathName(
 		result = internal_buffer[PAL_MAX_GLOBAL_BUFFERS];
 	}
 
+#ifndef __EMSCRIPTEN__
 #if !defined(PAL_FILESYSTEM_IGNORE_CASE) || !PAL_FILESYSTEM_IGNORE_CASE
 	if (result == NULL)
 	{
@@ -633,6 +634,7 @@ UTIL_GetFullPathName(
 			free(list);
 		}
 	}
+#endif
 #endif
 	if (result != NULL)
 	{
@@ -961,7 +963,7 @@ UTIL_LogSetPrelude(
 }
 
 #if PAL_NEED_STRCASESTR
-inline char* stoupper(char* s)
+PAL_FORCE_INLINE char* stoupper(const char* s)
 {
 	char* p = strdup(s);
 	char* p1 = p;
@@ -969,9 +971,10 @@ inline char* stoupper(char* s)
 	return p1;
 }
 PAL_C_LINKAGE char* strcasestr(const char *a, const char *b) {
-	const char *a1 = stoupper(a);
-	const char *b1 = stoupper(b);
+	char *a1 = stoupper(a);
+	char *b1 = stoupper(b);
 	char *ptr = strstr(a1, b1);
+	if (ptr != NULL) ptr = (char*)a + (ptr - a1);
 	free(a1);
 	free(b1);
 	return ptr;

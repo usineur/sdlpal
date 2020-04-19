@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -30,8 +30,6 @@
 #include "midi.h"
 #include "aviplay.h"
 #include <math.h>
-
-#define PAL_CDTRACK_BASE    10000
 
 /* WASAPI need fewer samples for less gapping */
 #ifndef PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI
@@ -181,6 +179,14 @@ AUDIO_FillBuffer(
    AVI_FillAudioBuffer(AVI_GetPlayState(), (LPBYTE)stream, len);
 }
 
+BOOL
+AUDIO_CD_Available(
+   VOID
+)
+{
+   return gConfig.eCDType != CD_NONE;
+}
+
 INT
 AUDIO_OpenDevice(
    VOID
@@ -209,9 +215,6 @@ AUDIO_OpenDevice(
       //
       return -1;
    }
-#if defined( __EMSCRIPTEN__ ) // Now either music/sound enabled will makes whole app crash in emscripten. Disabled until a solution is found.
-   return -1;
-#endif
 
    gAudioDevice.fOpened = FALSE;
    gAudioDevice.fMusicEnabled = TRUE;
@@ -243,7 +246,6 @@ AUDIO_OpenDevice(
         UTIL_LogOutput(LOGLEVEL_VERBOSE, "Available audio device %d:%s\n", i, SDL_GetAudioDeviceName(i,0));
     }
     UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio: requesting audio device: %s\n",(gConfig.iAudioDevice >= 0 ? SDL_GetAudioDeviceName(gConfig.iAudioDevice, 0) : "default"));
-    UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio: requesting audio spec:freq %d, format %d, channels %d, samples %d\n", gAudioDevice.spec.freq, gAudioDevice.spec.format,  gAudioDevice.spec.channels, gAudioDevice.spec.samples);
 #endif
 
    //
@@ -255,6 +257,8 @@ AUDIO_OpenDevice(
    gAudioDevice.spec.samples = gConfig.wAudioBufferSize;
    gAudioDevice.spec.callback = AUDIO_FillBuffer;
 
+   UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio: requesting audio spec:freq %d, format %d, channels %d, samples %d\n", gAudioDevice.spec.freq, gAudioDevice.spec.format,  gAudioDevice.spec.channels, gAudioDevice.spec.samples);
+
    if (SDL_OpenAudio(&gAudioDevice.spec, &spec) < 0)
    {
       UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio ERROR: %s, got spec:freq %d, format %d, channels %d, samples %d\n", SDL_GetError(), spec.freq, spec.format, spec.channels,  spec.samples);
@@ -265,7 +269,7 @@ AUDIO_OpenDevice(
    }
    else
    {
-      UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio succeed\n");
+      UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio succeed, got spec:freq %d, format %d, channels %d, samples %d\n", spec.freq, spec.format, spec.channels,  spec.samples);
       gAudioDevice.pSoundBuffer = malloc(gConfig.wAudioBufferSize * gConfig.iAudioChannels * sizeof(short));
    }
 
@@ -290,6 +294,9 @@ AUDIO_OpenDevice(
    case MUSIC_OGG:
 	   gAudioDevice.pMusPlayer = OGG_Init();
 	   break;
+   case MUSIC_OPUS:
+	   gAudioDevice.pMusPlayer = OPUS_Init();
+	   break;
    case MUSIC_MIDI:
 	   gAudioDevice.pMusPlayer = NULL;
 	   break;
@@ -302,7 +309,7 @@ AUDIO_OpenDevice(
    //
    switch (gConfig.eCDType)
    {
-   case MUSIC_SDLCD:
+   case CD_SDLCD:
    {
 #if PAL_HAS_SDLCD
 	   int i;
@@ -328,13 +335,17 @@ AUDIO_OpenDevice(
 	   gAudioDevice.pCDPlayer = NULL;
 	   break;
    }
-   case MUSIC_MP3:
+   case CD_MP3:
 	   gAudioDevice.pCDPlayer = MP3_Init();
 	   break;
-   case MUSIC_OGG:
+   case CD_OGG:
 	   gAudioDevice.pCDPlayer = OGG_Init();
 	   break;
+   case CD_OPUS:
+	   gAudioDevice.pCDPlayer = OPUS_Init();
+	   break;
    default:
+      gAudioDevice.pCDPlayer = NULL;
 	   break;
    }
 
@@ -551,6 +562,7 @@ AUDIO_PlayCDTrack(
   Parameters:
 
     [IN]  iNumTrack - number of the CD Audio Track.
+                      special case: -2: do NOTHING
 
   Return value:
 
@@ -563,6 +575,10 @@ AUDIO_PlayCDTrack(
 	{
 		AUDIO_PlayMusic(-1, FALSE, 0);
 	}
+   if (iNumTrack == -2 && gAudioDevice.pCDPlayer->iMusic > PAL_CDTRACK_BASE )
+   {
+       return TRUE;
+   }
 #if PAL_HAS_SDLCD
    if (gAudioDevice.pCD != NULL)
    {

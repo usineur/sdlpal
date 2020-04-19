@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -36,6 +36,11 @@
 
 # define PAL_PREFIX            "./"
 # define PAL_SAVE_PREFIX       "./"
+
+# if APPIMAGE
+#  undef PAL_PREFIX
+#  define PAL_PREFIX            PAL_va(PAL_MAX_GLOBAL_BUFFERS-1,"%s%s", SDL_getenv("HOME"),"/.config")
+# endif
 
 # define PAL_DEFAULT_WINDOW_WIDTH   640
 # define PAL_DEFAULT_WINDOW_HEIGHT  400

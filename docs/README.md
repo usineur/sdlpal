@@ -4,9 +4,15 @@ SDLPAL
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/sdlpal/sdlpal?branch=master&svg=true)](https://ci.appveyor.com/project/palxex/sdlpal-itfml)
 [ ![Download](https://api.bintray.com/packages/sdlpal/nightly/master/images/download.svg) ](https://bintray.com/sdlpal/nightly/master/_latestVersion)
 
-***SDLPAL*** is an SDL-based open-source cross-platform reimplementation of the classic Chinese RPG game *Xiān jiàn Qí Xiá Zhuàn (Chinese: 仙剑奇侠传/仙劍奇俠傳)* (also known as *Chinese Paladin* or *Legend of Sword and Fairy*, or *PAL* for short).
+***SDLPAL*** is an SDL-based open-source cross-platform reimplementation of the classic Chinese RPG game *Xiān jiàn Qí Xiá Zhuàn (Simplified Chinese: 仙剑奇侠传, Traditional Chinese: 仙劍奇俠傳)* (also known as *Chinese Paladin* or *Legend of Sword and Fairy*, or *PAL* for short).
 
 [![Google Play](https://sdlpal.github.io/images/googleplay.png)](https://play.google.com/store/apps/details?id=com.sdlpal.sdlpal)
+
+If you would like to get the nightly build from Google Play Store, [please enroll](https://play.google.com/apps/testing/com.sdlpal.sdlpal) (WARNING: might be unstable).
+
+[Try the online demo for now!](https://sdlpal.github.io/demo/sdlpal.html)
+=======
+The development team has built a web-based demo version of SDLPAL on github pages via Emscripten, which you can try anytime by clicking the above link. It should work well on most morden browsers (e.g., Google Chrome, Microsoft Edge, Safari, ...), but there may still be problems on some browsers. Before you can enjoy your game journey, please prepare a zipped file containing the game resource data.
 
 LICENSE
 =======
@@ -26,6 +32,7 @@ This program made extensive use of the following libraries:
 * [SDL_mixer](http://www.libsdl.org/projects/SDL_mixer/)
 * [libmad](http://www.underbit.com/products/mad/)
 * [libogg & libvorbis](http://www.vorbis.com/)
+* [libopus & opusfile](https://www.opus-codec.org/)
 * [FLTK](http://www.fltk.org)
 * OPL player from [Adplug](http://adplug.sourceforge.net/)
 * OPL emulation cores from [DOSBOX project](http://www.dosbox.com), [MAME project](http://mamedev.org/) and [Chocolate Doom project](https://github.com/chocolate-doom/chocolate-doom)
@@ -135,6 +142,10 @@ Android
 -------
 
 To build the game, open the `android` directory through ***Android Studio***, and click `Make Project`.
+
+* NOTE: `android/app/src/main/java/org/libsdl/app` is a link to `3rd/SDL/android-project/app/src/main/java/org/libsdl/app`. Deal with it properly if your git system does not create link automatically. 
+
+* NOTE: For Windows users, please put the repo in the root of a partition. A too long path may cause compilation to fail. 
 
 Nintendo 3DS
 ------------

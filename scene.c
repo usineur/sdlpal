@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -529,11 +529,7 @@ PAL_CheckObstacle(
 --*/
 {
    int x, y, h, xr, yr;
-
-   if (PAL_X(pos) < 0 || PAL_X(pos) >= 2048 || PAL_Y(pos) < 0 || PAL_Y(pos) >= 2048)
-   {
-      return TRUE;
-   }
+   int blockX = PAL_X(gpGlobals->partyoffset)/32, blockY = PAL_Y(gpGlobals->partyoffset)/16;
 
    //
    // Check if the map tile at the specified position is blocking
@@ -541,6 +537,14 @@ PAL_CheckObstacle(
    x = PAL_X(pos) / 32;
    y = PAL_Y(pos) / 16;
    h = 0;
+
+   //
+   // Avoid walk out of range, look out of map
+   //
+   if (x < blockX || x >= 2048 || y < blockY || y >= 2048 )
+   {
+      return TRUE;
+   }
 
    xr = PAL_X(pos) % 32;
    yr = PAL_Y(pos) % 16;
@@ -705,17 +709,17 @@ PAL_UpdatePartyGestures(
          }
       }
 
-      if (gpGlobals->nFollower > 0)
+      for (i = 1; i <= gpGlobals->nFollower; i++)
       {
          //
          // Update the position and gesture for the follower
          //
-         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + 1].x =
-            gpGlobals->rgTrail[3].x - PAL_X(gpGlobals->viewport);
-         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + 1].y =
-            gpGlobals->rgTrail[3].y - PAL_Y(gpGlobals->viewport);
-         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + 1].wFrame =
-            gpGlobals->rgTrail[3].wDirection * 3 + iStepFrameFollower;
+         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + i].x =
+            gpGlobals->rgTrail[2+i].x - PAL_X(gpGlobals->viewport);
+         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + i].y =
+            gpGlobals->rgTrail[2+i].y - PAL_Y(gpGlobals->viewport);
+         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + i].wFrame =
+            gpGlobals->rgTrail[2+i].wDirection * 3 + iStepFrameFollower;
       }
    }
    else
@@ -740,10 +744,10 @@ PAL_UpdatePartyGestures(
          gpGlobals->rgParty[i].wFrame = gpGlobals->rgTrail[2].wDirection * f;
       }
 
-      if (gpGlobals->nFollower > 0)
+      for (i = 1; i <= gpGlobals->nFollower; i++)
       {
-         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + 1].wFrame =
-            gpGlobals->rgTrail[3].wDirection * 3;
+         gpGlobals->rgParty[gpGlobals->wMaxPartyMemberIndex + i].wFrame =
+            gpGlobals->rgTrail[2+i].wDirection * 3;
       }
 
       s_iThisStepFrame &= 2;

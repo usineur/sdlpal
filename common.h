@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -211,6 +211,9 @@ typedef const WCHAR        *LPCWSTR;
 #endif
 #ifndef PAL_HAS_OGG
 # define PAL_HAS_OGG          1   /* Try always enable OGG. If compilation/run failed, please change this value to 0. */
+#endif
+#ifndef PAL_HAS_OPUS
+# define PAL_HAS_OPUS         1   /* Try always enable OPUS. If compilation/run failed, please change this value to 0. */
 #endif
 
 #ifndef PAL_CONFIG_PREFIX

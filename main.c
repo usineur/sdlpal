@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -30,6 +30,8 @@
 
 static jmp_buf g_exit_jmp_buf;
 static int g_exit_code = 0;
+
+char gExecutablePath[PAL_MAX_PATH];
 
 #define BITMAPNUM_SPLASH_UP         (gConfig.fIsWIN95 ? 0x03 : 0x26)
 #define BITMAPNUM_SPLASH_DOWN       (gConfig.fIsWIN95 ? 0x04 : 0x27)
@@ -466,6 +468,11 @@ main(
 
 --*/
 {
+#if !defined( __EMSCRIPTEN__ ) && !defined(__WINRT__)
+   memset(gExecutablePath,0,PAL_MAX_PATH);
+   strncpy(gExecutablePath, argv[0], PAL_MAX_PATH);
+#endif
+
 #if PAL_HAS_PLATFORM_STARTUP
    UTIL_Platform_Startup(argc,argv);
 #endif

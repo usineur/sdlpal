@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -35,8 +35,6 @@ typedef struct tagMP3PLAYER
 	AUDIOPLAYER_COMMONS;
 
 	mad_data           *pMP3;
-	INT                 iMusic;
-	BOOL                fLoop;
 } MP3PLAYER, *LPMP3PLAYER;
 
 static VOID MP3_Close(

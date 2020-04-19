@@ -1,7 +1,7 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2019, SDLPAL development team.
+// Copyright (c) 2011-2020, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
@@ -29,13 +29,13 @@
 # include <emscripten.h>
 # define SDL_Delay emscripten_sleep
 
-# define PAL_PREFIX            "data/"
-# define PAL_SAVE_PREFIX       "data/"
+# define PAL_PREFIX            "/data/"
+# define PAL_SAVE_PREFIX       "/data/"
 # define PAL_HAS_TOUCH         0
-# define PAL_DEFAULT_WINDOW_WIDTH   320
-# define PAL_DEFAULT_WINDOW_HEIGHT  200
+# define PAL_DEFAULT_WINDOW_WIDTH   640
+# define PAL_DEFAULT_WINDOW_HEIGHT  400
 # define PAL_DEFAULT_TEXTURE_WIDTH   640
-# define PAL_DEFAULT_TEXTURE_HEIGHT  480
+# define PAL_DEFAULT_TEXTURE_HEIGHT  400
 
 # if SDL_VERSION_ATLEAST(2,0,0)
 #  define PAL_VIDEO_INIT_FLAGS  (SDL_WINDOW_SHOWN)
@@ -55,5 +55,6 @@
 #define strcasestr(a,b) strstr(toupper((a)),toupper((b)))
 
 #define PAL_HAS_GLSL 1
+#define PAL_HAS_OPUS 0
 
 #endif

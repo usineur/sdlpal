@@ -1,22 +1,22 @@
 language: c
+os: linux
 
 env:
   global:
     - CACHE=$HOME/.sdlpal-caches
 
 cache:
-  branch: md5deep
   directories:
     - $CACHE
 
 before_script:
   - mkdir deploy
 
-matrix:
+jobs:
     fast_finish: true
     include:
       - os: linux
-        env: TARGET=Linux
+        env: TARGET=AppImage
         addons:
           apt:
             packages:
@@ -25,15 +25,14 @@ matrix:
             - upx-ucl
         script:
           - cd unix
-          - make
-          - upx --best --lzma sdlpal
-          - mv sdlpal ../deploy/sdlpal-linux
-          - make clean
+          - make CCFLAGS="-DAPPIMAGE=1"
+          - ./appimage.sh
+          - rm ../main.unix.*
           - make check
           - cd ..
 
       - os: linux
-        env: TARGET=MinGW32 SDL2_VERSION=2.0.8
+        env: TARGET=MinGW32 SDL2_VERSION=2.0.10
         addons:
           apt:
             packages:
@@ -48,17 +47,16 @@ matrix:
             if ! [ -d $CACHE/SDL2-$SDL2_VERSION ]
             then
                 export PUSHD="$(pwd)"
-                mkdir -p "${CACHE}"
-                cd $CACHE
-                wget http://libsdl.org/release/SDL2-devel-$SDL2_VERSION-mingw.tar.gz
-                tar xvf SDL2-devel-$SDL2_VERSION-mingw.tar.gz
-                sed -i "s@/usr/local@$PUSHD/SDL2-$SDL2_VERSION@g" SDL2-$SDL2_VERSION/i686-w64-mingw32/bin/sdl2-config
-                rm *.gz
+                cd ../3rd/SDL
+                CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ \
+                    bash ./configure --host=i686-w64-mingw32 --prefix=$CACHE/SDL2-$SDL2_VERSION \
+                    --enable-static --disable-shared
+                make install V=1 SHELL=/bin/bash
                 cd "${PUSHD}"
             fi
           - ln -sf $CACHE/SDL2-$SDL2_VERSION
-          - export PATH=$(pwd)/SDL2-$SDL2_VERSION/i686-w64-mingw32/bin:$PATH
-          - cat SDL2-$SDL2_VERSION/i686-w64-mingw32/bin/sdl2-config
+          - export PATH=$(pwd)/SDL2-$SDL2_VERSION/bin:$PATH
+          - cat SDL2-$SDL2_VERSION/bin/sdl2-config
           - cd ..
         script:
           - cd win32
@@ -67,6 +65,62 @@ matrix:
           - upx --best --lzma sdlpal.exe
           - zip sdlpal-win32-mingw.zip sdlpal.exe
           - mv sdlpal-win32-mingw.zip ../deploy/
+          - cd ..
+
+      - os: linux
+        env: TARGET=MinGW32-armv7 SDL2_VERSION=2.0.10-armv7
+        addons:
+          apt:
+            packages:
+            - zip
+            - upx-ucl
+            - make
+            - lzma
+            - openssl
+            - mono-devel
+        before_install:
+          - cd win32
+          - |
+            if ! [ -f $CACHE/llvm-mingw-armv7/armv7-w64-mingw32/bin/libc++.dll ]
+            then
+                # download llvm-mingw for armv7 build
+                export PUSHD="$(pwd)"
+                mkdir $CACHE
+                cd $CACHE
+                wget -O llvm-mingw-armv7.tar.gz 'https://github.com/sdlpal/tools/releases/download/sensedown/llvm-mingw-armv7.tar.gz'
+                tar xzvf llvm-mingw-armv7.tar.gz
+                rm llvm-mingw-armv7.tar.gz
+                cd "${PUSHD}"
+            fi
+          - |
+            if ! [ -d $CACHE/SDL2-$SDL2_VERSION ]
+            then
+                export PUSHD="$(pwd)"
+                cd ../3rd/SDL
+                export PATH=${CACHE}/llvm-mingw-armv7/bin:$PATH
+                CC=armv7-w64-mingw32-gcc CXX=armv7-w64-mingw32-g++ \
+                    bash ./configure --host=armv7-w64-mingw32 --prefix=$CACHE/SDL2-$SDL2_VERSION \
+                    --enable-static --disable-shared --disable-joystick --disable-haptic \
+                    --disable-video-opengl --enable-render-d3d
+                make install V=1 SHELL=/bin/bash
+                cd "${PUSHD}"
+            fi
+          - ln -sf $CACHE/SDL2-$SDL2_VERSION
+          - ln -sf $CACHE/llvm-mingw-armv7 llvm-mingw
+          - export PATH=$(pwd)/SDL2-$SDL2_VERSION/bin:$(pwd)/llvm-mingw/bin:$PATH
+          - cat SDL2-$SDL2_VERSION/bin/sdl2-config
+          - cd ..
+        script:
+          - cd win32
+          - make HOST=armv7-w64-mingw32- OPENGL_LIBS=
+          - armv7-w64-mingw32-strip -s sdlpal.exe
+          - "openssl pkcs12 -passin pass: -in ../winrt/SDLPal.UWP/SDLPal_TemporaryKey.pfx -nocerts -nodes -out key.pem"
+          - "openssl rsa -passout pass:temporary -in key.pem -outform PVK -pvk-strong -out authenticode.pvk"
+          - "openssl pkcs12 -passin pass: -in ../winrt/SDLPal.UWP/SDLPal_TemporaryKey.pfx -nokeys -nodes -out cert.pem"
+          - "openssl crl2pkcs7 -nocrl -certfile cert.pem -outform DER -out authenticode.spc"
+          - "echo temporary | signcode -spc authenticode.spc -v authenticode.pvk -a sha1 -$ commercial -n SDLPal -i http://sdlpal.github.io -t http://timestamp.verisign.com/scripts/timstamp.dll -tr 10 sdlpal.exe"
+          - zip sdlpal-windows-armv7.zip sdlpal.exe
+          - mv sdlpal-windows-armv7.zip ../deploy/
           - cd ..
 
       - os: linux
@@ -114,7 +168,6 @@ matrix:
           
       - os: linux
         env: TARGET=3ds
-        sudo: enabled
         addons:
           apt:
             packages:
@@ -157,34 +210,52 @@ matrix:
           - platform-tools
           - tools
           - build-tools-$ANDROID_BUILD_TOOLS
-          - android-26
+          - android-28
           licenses:
           - android-sdk-preview-license-.+
           - android-sdk-license-.+
           - google-gdk-license-.+
         cache:
-          branch: md5deep
           directories:
+            - $CACHE
             - $HOME/.gradle/caches/
             - $HOME/.gradle/wrapper/dists/
         before_install:
           - export PUSHD="$(pwd)"
-          - mkdir -p $CACHE/
-          - cd $CACHE/
-          # After measuring, caching android NDK is more slow than direct download
-          - wget http://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux-x86_64.zip -O ndk.zip
-          - unzip ndk.zip > /dev/null
+          - mkdir -p $CACHE
+          - cd $CACHE
+          - |
+            if [ -f ndk.zip ]
+            then
+              mv ndk.zip ndk-$NDK_VERSION.zip
+            fi
+          - |
+            if ! [ -f ndk-$NDK_VERSION.zip ]
+            then
+              wget http://dl.google.com/android/repository/android-ndk-$NDK_VERSION-linux-x86_64.zip -O ndk-$NDK_VERSION.zip
+            fi
+          - cd ..
+          - unzip $CACHE/ndk-$NDK_VERSION.zip > /dev/null
           - export ANDROID_NDK_HOME=`pwd`/android-ndk-$NDK_VERSION
           - cd "${PUSHD}"
         script:
           - cd android
-          - sed -i.bak s/"android:versionCode.*"/"android:versionCode=\"`date +%Y%m%d`\""/g ./app/src/main/AndroidManifest.xml
+          - sed -i.bak s/"android:versionCode.*"/"android:versionCode=\"`date +'%s'`\""/g ./app/src/main/AndroidManifest.xml
           - ./gradlew assembleRelease
           - cd ..
-          - jarsigner -storetype pkcs12 -keystore winrt/SDLPal.UWP/SDLPal_TemporaryKey.pfx -sigalg SHA1withRSA -digestalg SHA1 -signedjar deploy/sdlpal-release.apk -storepass "" android/app/build/outputs/apk/release/app-release-unsigned.apk 1
+          - if [[ $TRAVIS_COMMIT_MESSAGE =~ .*[skip\ play].* ]]; then touch $HOME/PLAY_DEPLOY; else echo 'WARNING - skipping Google Play deployment'; fi
+          - |
+            if [ -f "$HOME/PLAY_DEPLOY" ] && ! [ -z "$ANDROID_KEY_FILE" ]
+            then
+              /usr/local/android-sdk/build-tools/${ANDROID_BUILD_TOOLS}/zipalign -v 4 android/app/build/outputs/apk/release/app-release-unsigned.apk deploy/sdlpal-release.apk
+              echo ${ANDROID_KEY_FILE} | base64 -d > android-key.key
+              /usr/local/android-sdk/build-tools/${ANDROID_BUILD_TOOLS}/apksigner sign --ks android-key.key --ks-pass pass:${ANDROID_KEY_PASS} deploy/sdlpal-release.apk
+            else
+              jarsigner -storetype pkcs12 -keystore winrt/SDLPal.UWP/SDLPal_TemporaryKey.pfx -sigalg SHA1withRSA -digestalg SHA1 -signedjar deploy/sdlpal-release.apk -storepass "" android/app/build/outputs/apk/release/app-release-unsigned.apk 1
+            fi
 
       - os: osx
-        osx_image: xcode9.2
+        osx_image: xcode11
         env: TARGET=iOS
         cache: cocoapods
         podfile: ios/SDLPal/Podfile
@@ -194,11 +265,11 @@ matrix:
           - xcodebuild -workspace SDLPal.xcworkspace -scheme SDLPal ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO -configuration Release CONFIGURATION_BUILD_DIR=/tmp/sdlpal-build
           - mkdir -p Payload
           - mv /tmp/sdlpal-build/SDLPal.app Payload
-          - zip ../../deploy/sdlpal-impactor.ipa -r Payload
+          - zip ../../deploy/sdlpal-unsigned.ipa -r Payload
           - cd ../..
 
       - os: osx
-        osx_image: xcode10.2
+        osx_image: xcode11
         env: TARGET=macOS
         language: objective-c
         script:
@@ -234,22 +305,36 @@ matrix:
           - hdiutil create -srcfolder build/Release/Pal.app -volname "SDLPal-SDL1" ../deploy/sdlpal-sdl1-macos.dmg
           - cd ..
 
+      - os: linux
+        language: node_js
+        env: TARGET=Emscripten TAG=1.39.8-upstream
+        services:
+          - docker
+        before_install:
+          - docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:$TAG bash
+        script:
+          - sed -i 's@http://localhost:8080/@https://sdlpal.github.io/demo/@g' emscripten/Makefile
+          - docker exec -it emscripten emmake make -C emscripten
+
 before_deploy:
-  - sed=sed; date=date
   - |
-    if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+    if [ -f "$HOME/PLAY_DEPLOY" ]
     then
-        brew update
-        brew install gnu-sed
-        sed=gsed
-        date=gdate
+        sudo apt-add-repository -y ppa:brightbox/ruby-ng
+        sudo apt-get update
+        sudo apt-get install -y ruby2.4 ruby2.4-dev
+        sudo gem install google-api-client -v 0.29.1
+        sudo gem install fastlane
+        echo ${PLAY_API_JSONFILE} | base64 -d > google-key.json;
     fi
-  - DATE=$($date -d $(git show -s --format=%cI) "+%F")
+  - CI=$(git show -s --format=%cI)
+  - DATE=${CI%T*}
   - COMMIT=$(git rev-parse --short HEAD)
+  - VERSION=v$DATE-g$COMMIT
   - set -f
   - |
-    $sed -i "
-    s/@VERSION@/v$DATE-g$COMMIT/g
+    sed -i.bak "
+    s/@VERSION@/$VERSION/g
     s/@DESC@/$(echo -n $TRAVIS_COMMIT_MESSAGE|tr '\r' '\\r'|tr '\n' '\\n'|sed -e 's@[\\"]@\\&@g;s@[/&\$]@\\&@g')/g
     s/@RELEASE_DATE@/$(git show -s --format=%cI)/g
     s/@VCS_TAG@/$(git describe --tags)/g
@@ -260,11 +345,22 @@ before_deploy:
     s/@COMMITID@/$(git show -s --format=%h)/g
     " bintray.json
   - set +f
-  - cat bintray.json
+  - git config --global user.email "sdlpal@sdlpal.com"
+  - git config --global user.name "SDLPAL"
 
 deploy:
+  - provider: script
+    script: bash -c '[ -f "$HOME/PLAY_DEPLOY" ] && fastlane supply --apk deploy/sdlpal-release.apk --track alpha --json_key ./google-key.json --package_name com.sdlpal.sdlpal || true'
+    skip_cleanup: true
+    on:
+      branch: master
+  - provider: script
+    script: bash -c '[[ -f "emscripten/sdlpal.js" ]] && git clone --depth=1 https://github.com/sdlpal/demo ~/demo && cp -f emscripten/*.{html,js,wasm,wasm.map,png} ~/demo && cd ~/demo && git add -A && git commit -mAutoupdate -a && git push "https://${AUTO_UPDATE_USERNAME}:${AUTO_UPDATE_PASS}@github.com/sdlpal/demo" || true'
+    skip_cleanup: true
+    on:
+      branch: master
   - provider: releases
-    api_key:
+    token:
       secure: FFV8UBcz6GkeSoGRbrL9tnTpVqXoFjFK2QtW0Ml8YvvqaHhxOaIWs2nAabOGsW1mJop/QlpuUNw1TfLl7TokcUDgOHrFRdC8hVY7K1uSWMnt7m4ZRPatVybIkzgrnItHlnMrL4uJK2xXb6Jc5+cSrU5jRMcmTZjaOKLTBwF97+6AgqpdmKUCVYZJzQYg0Jn9GfaL1EOGl7ISt/VEgi/tKFzJvJVxJBU3NuKyxXlfEwkTiSOFuGoD5qWDjCE+aGxTR6RQefsADPIDfeU3TJHTJE/ORGy9gl+Y41JgU0Bfgipcqg1RSwNclclmxgi8lo/XNUiZAMTyQrXjByBWcvYovk+H4h9mbvJlrVSjI8Wxb5ICcYkhDVkNxtEXX7AsIk4yHiNTi1MAW0qJJKinaFxLmK2U3LGEK3DudXl/0eVRoQATmRcXLdBQezISt2CWpTktCxlQmtz/GsoHv0PcWdkJYL4qbbRrBRFj9++VjlnCI124YZnbVjC3+jtWN1Zluxynj0GDBY3r7EdLWWKZo5XnygPOZ8+uaTMYfqmTvQWPc5GRRRdVJowQFQhb48hzKyWYqsf8eyS3VuZ9b/DwES3dutOaX7sIL9Vkg3DlQYOEz938MB4VbTGizUUrBbrIP4Kz/+WOZ9pxM9X+qsgMYkw8FvHqn2TvCWxPDCgqq3zUWig=
     file_glob: true
     file: deploy/*
@@ -274,13 +370,19 @@ deploy:
       all_branches: true
       tags: true
   - provider: bintray
-    user: palxex
-    key:
-      secure: NQl1hNntoXlHyj7uAMiHr3OsMwrEgAeYIIopUSY6Ete9ODVFSTzSqm2lb/Nwq+4ZV5UCYVpDdpBlhWZlxZ/TO9cPVJuwi7oPtRKHNKvAAHRNHWsyO965Y8qtMIo1SGPnNIF5fA8KS9W0iKUAlUubMNHpJBnT2GT2ylrmf7YHkb2mv7OTGswcbMdtQosOy2T4WMCOPTGsu8jcVPX1TMlmhIrbEQqQ4SV8Lz7VoNDPDswlcZrx/X3ZkBHz+iAZQM3vyrAfpJNHpR1qdVXpSQ6AJNrvxAyv3iXCQTmy28o4Skn9ciU4A8kNXSyrKK8O3lKv65XuSGG9XoaldII1SvG3woI2t1dwAxcxmn2/Yf2Uznuostz7j5L5FtJqW9+c4KGXxCh+RgMrTbM1n0yvFMwcxuTIYemFb7OOyLnYf2hhVZXN8GBItoqhZoGboBp0s1usT1XqHSKHtf6RXd9IGOZH1LwRyUNYoLTY8cMJVrzQ9LtpdHeapZgr3idtrRCOmEF7d4/q8WUD+yOZuzUECL2QEnEgg6Ho79chWAUngUCdI4v70nCaMNCwLaTVJY5jtnt3VVUCYJ6vsoimxTbhQT2Cf6HTRcHt1JKhI4cGTBcCRIRdXWqSX4VmxBUCQ/XvskJX5Kj9FJC2/jhZDfIXcKfrYjw0tk3+7FzZuAwt8FnznUs=
+    user: $BINTRAY_USER
+    key: $BINTRAY_KEY
     file: bintray.json
     skip_cleanup: true
     on:
       all_branches: true
+
+after_deploy:
+  - curl -sS -u "$BINTRAY_USER:$BINTRAY_KEY" -X PATCH "https://api.bintray.com/packages/sdlpal/nightly/$TRAVIS_BRANCH" -H "Content-Type:application/json" -d '{"github_repo":"sdlpal/sdlpal"}'
+  - curl -sS -u "$BINTRAY_USER:$BINTRAY_KEY" -X POST "https://api.bintray.com/packages/sdlpal/nightly/$TRAVIS_BRANCH/readme" -H "Content-Type:application/json" -d '{"github":{"github_repo":"sdlpal/sdlpal"}}'
+  - FILE=$(ls deploy)
+  - sleep 10
+  - curl -sS -u "$BINTRAY_USER:$BINTRAY_KEY" -X PUT "https://api.bintray.com/file_metadata/sdlpal/nightly/$VERSION/$FILE" -H "Content-Type:application/json" -d '{"list_in_downloads":true}'
 
 notifications:
   webhooks:
