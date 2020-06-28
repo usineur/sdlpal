@@ -3,14 +3,14 @@ TITLE_ID = SDLPAL001
 
 INTER    = .vita
 
-PREFIX   = arm-vita-eabi
+PREFIX   = $(VITASDK)/bin/arm-vita-eabi
 
 SOURCES  = . .. ../adplug
 CFILES   = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES   = $(CFILES:.c=$(INTER).o) $(CPPFILES:.cpp=$(INTER).o)
 
-CCFLAGS  = -Wl,-q -O3 -g -I. -I.. -I$(VITASDK)/$(PREFIX)/include/SDL2 -I$(VITASDK)/$(PREFIX)/include/vitashaders
+CCFLAGS  = -Wl,-q -O3 -g -I. -I.. -I$(VITASDK)/arm-vita-eabi/include/SDL2 -I$(VITASDK)/arm-vita-eabi/include/vitashaders
 CXXFLAGS = $(CCFLAGS) -std=c++11
 CFLAGS   = $(CCFLAGS) -std=gnu99 -D_GNU_SOURCE
 LDFLAGS  = -lSDL2 -lvita2d_fbo -lvitashaders \
@@ -21,18 +21,18 @@ LDFLAGS  = -lSDL2 -lvita2d_fbo -lvitashaders \
 all: $(TARGET).vpk
 
 $(TARGET).vpk: eboot.bin
-	vita-mksfoex -s TITLE_ID=$(TITLE_ID) "$(TARGET)" param.sfo
-	vita-pack-vpk -s param.sfo -b eboot.bin \
+	$(VITASDK)/bin/vita-mksfoex -s TITLE_ID=$(TITLE_ID) "$(TARGET)" param.sfo
+	$(VITASDK)/bin/vita-pack-vpk -s param.sfo -b eboot.bin \
 	-a res/icon0.png=sce_sys/icon0.png \
 	-a res/bg.png=sce_sys/livearea/contents/bg.png \
 	-a res/startup.png=sce_sys/livearea/contents/startup.png \
 	-a res/template.xml=sce_sys/livearea/contents/template.xml $@
 
 eboot.bin: $(TARGET).velf
-	vita-make-fself -c -s $< eboot.bin
+	$(VITASDK)/bin/vita-make-fself -c -s $< eboot.bin
 
 %.velf: %.elf
-	vita-elf-create $< $@
+	$(VITASDK)/bin/vita-elf-create $< $@
 
 $(TARGET).elf: $(OFILES)
 	@$(PREFIX)-g++ $(CXXFLAGS) $(OFILES) -o $@ $(LDFLAGS)

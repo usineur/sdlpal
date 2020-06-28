@@ -2,7 +2,7 @@ TARGET    = sdlpal
 
 INTER     = .switch
 
-PREFIX    = aarch64-none-elf
+PREFIX    = $(DEVKITA64)/bin/aarch64-none-elf
 
 SOURCES   = . .. ../adplug
 CFILES    = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
