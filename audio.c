@@ -668,14 +668,3 @@ AUDIO_Unlock(
 	SDL_UnlockAudio();
 #endif
 }
-
-#ifdef __vita__
-VOID
-AUDIO_Resume(
-	VOID
-)
-{
-	gAudioDevice.pMusPlayer->Resume(gAudioDevice.pMusPlayer);
-	gAudioDevice.pSoundPlayer->Resume(gAudioDevice.pSoundPlayer);
-}
-#endif

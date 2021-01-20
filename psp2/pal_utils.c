@@ -228,7 +228,6 @@ UTIL_Platform_Init(
 )
 {
 	PAL_RegisterInputFilter(NULL, input_event_filter, NULL);
-	VITA_SetupCallbacks();
 	gConfig.fLaunchSetting = FALSE;
 	return 0;
 }

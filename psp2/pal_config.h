@@ -26,7 +26,6 @@
 
 # include <strings.h>
 # include <psp2/kernel/clib.h>
-# include "psp2-resume.h"
 
 # define printf sceClibPrintf
 # define fprintf(stderr, ...) sceClibPrintf(__VA_ARGS__)

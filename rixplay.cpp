@@ -295,39 +295,6 @@ RIX_Shutdown(
 	}
 }
 
-#ifdef __vita__
-VOID
-RIX_Resume(
-	VOID     *object
-)
-/*++
-	Purpose:
-
-	Resume the RIX player subsystem.
-
-	Parameters:
-
-	None.
-
-	Return value:
-
-	None.
-
---*/
-{
-	if (object != NULL)
-	{
-		LPRIXPLAYER pRixPlayer = (LPRIXPLAYER)object;
-		FILE *rfp = pRixPlayer->rix->getfp();
-		if (rfp)
-		{
-			fclose(rfp);
-			rfp = UTIL_OpenFile("mus.mkf");
-		}
-	}
-}
-#endif
-
 static BOOL
 RIX_Play(
 	VOID     *object,
@@ -430,9 +397,6 @@ RIX_Init(
 		pRixPlayer->FillBuffer = RIX_FillBuffer;
 		pRixPlayer->Shutdown = RIX_Shutdown;
 		pRixPlayer->Play = RIX_Play;
-#ifdef __vita__
-		pRixPlayer->Resume = RIX_Resume;
-#endif
 	}
 
 	auto chip = (Copl::ChipType)gConfig.eOPLChip;

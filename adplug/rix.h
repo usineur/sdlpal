@@ -53,10 +53,6 @@ class CrixPlayer: public CPlayer
   void set_extra_init(uint32_t* regs, uint8_t* datas, int n);
 #endif
 
-#ifdef __vita__
-  FILE * getfp() { return fp; }
-#endif
-
  protected:	
   typedef struct {
     uint8_t v[14];
