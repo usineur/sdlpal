@@ -1,15 +1,14 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2020, SDLPAL development team.
+// Copyright (c) 2011-2021, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
 //
 // SDLPAL is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// it under the terms of the GNU General Public License, version 3
+// as published by the Free Software Foundation.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -221,6 +220,7 @@ AUDIO_OpenDevice(
    gAudioDevice.fSoundEnabled = TRUE;
    gAudioDevice.iMusicVolume = gConfig.iMusicVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
    gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
+   if(gConfig.eMIDISynth == SYNTH_NATIVE)
    MIDI_SetVolume(gConfig.iMusicVolume);
 
    //
@@ -298,7 +298,10 @@ AUDIO_OpenDevice(
 	   gAudioDevice.pMusPlayer = OPUS_Init();
 	   break;
    case MUSIC_MIDI:
-	   gAudioDevice.pMusPlayer = NULL;
+	   if (gConfig.eMIDISynth == SYNTH_TIMIDITY)
+		   gAudioDevice.pMusPlayer = TIMIDITY_Init();
+	   else if (gConfig.eMIDISynth == SYNTH_TINYSOUNDFONT)
+		   gAudioDevice.pMusPlayer = TSF_Init();
 	   break;
    default:
 	   break;
@@ -410,7 +413,7 @@ AUDIO_CloseDevice(
 	  gAudioDevice.pSoundBuffer = NULL;
    }
 
-   if (gConfig.eMusicType == MUSIC_MIDI)
+   if (gConfig.eMIDISynth == SYNTH_NATIVE && gConfig.eMusicType == MUSIC_MIDI)
    {
       MIDI_Play(0, FALSE);
    }
@@ -463,6 +466,7 @@ AUDIO_IncreaseVolume(
    AUDIO_ChangeVolumeByValue(&gConfig.iSoundVolume, 3);
    gAudioDevice.iMusicVolume = gConfig.iMusicVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
    gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
+   if(gConfig.eMIDISynth == SYNTH_NATIVE)
    MIDI_SetVolume(gConfig.iMusicVolume);
 }
 
@@ -489,6 +493,7 @@ AUDIO_DecreaseVolume(
    AUDIO_ChangeVolumeByValue(&gConfig.iSoundVolume, -3);
    gAudioDevice.iMusicVolume = gConfig.iMusicVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
    gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
+   if(gConfig.eMIDISynth == SYNTH_NATIVE)
    MIDI_SetVolume(gConfig.iMusicVolume);
 }
 
@@ -536,7 +541,7 @@ AUDIO_PlayMusic(
 		AUDIO_PlayCDTrack(-1);
 	}
 
-   if (gConfig.eMusicType == MUSIC_MIDI)
+   if (gConfig.eMIDISynth == SYNTH_NATIVE && gConfig.eMusicType == MUSIC_MIDI)
    {
       MIDI_Play(iNumRIX, fLoop);
       return;

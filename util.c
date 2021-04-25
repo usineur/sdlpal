@@ -1,15 +1,14 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2020, SDLPAL development team.
+// Copyright (c) 2011-2021, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
 //
 // SDLPAL is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// it under the terms of the GNU General Public License, version 3
+// as published by the Free Software Foundation.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -580,6 +579,16 @@ UTIL_CloseFile(
    }
 }
 
+BOOL
+UTIL_IsFileExist(
+    const char *path
+)
+{
+    if( UTIL_IsAbsolutePath(path) )
+        return UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, "", path) != NULL;
+    else
+        return UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, gConfig.pszGamePath, path) != NULL;
+}
 
 const char *
 UTIL_GetFullPathName(
@@ -980,3 +989,19 @@ PAL_C_LINKAGE char* strcasestr(const char *a, const char *b) {
 	return ptr;
 }
 #endif
+
+char basename_buf[256];
+
+char *UTIL_basename(const char *filename) {
+    memset(basename_buf, 0, 256);
+    memcpy(basename_buf, filename, strlen(filename));
+    
+    char *pos = NULL;
+    int broked = 0;
+    for( int i=0;i<strlen(PAL_PATH_SEPARATORS);i++)
+        if( (pos = strrchr(basename_buf,PAL_PATH_SEPARATORS[i])) != NULL )
+            *pos='\0', broked = 1;
+    if( !broked )
+        sprintf((char*)basename_buf, "./");
+    return (char*)basename_buf;
+}

@@ -1,15 +1,14 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2020, SDLPAL development team.
+// Copyright (c) 2011-2021, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
 //
 // SDLPAL is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// it under the terms of the GNU General Public License, version 3
+// as published by the Free Software Foundation.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -116,7 +115,7 @@ PAL_DetectCodePage(
 {
 	FILE *fp;
 	char *word_buf = NULL;
-	long word_len = 0;
+	size_t word_len;
 	CODEPAGE cp = CP_BIG5;
 
 	if (NULL != (fp = UTIL_OpenFile(filename)))
@@ -740,7 +739,7 @@ PAL_SaveGame_Common(
 )
 {
 	FILE *fp;
-	int   i;
+	size_t i;
 
 	s->wSavedTimes = wSavedTimes;
 	s->wViewportX = PAL_X(gpGlobals->viewport);
@@ -886,6 +885,32 @@ PAL_SaveGame(
 }
 
 VOID
+PAL_ReloadInNextTick(
+    INT           iSaveSlot
+)
+/*++
+  Purpose:
+
+    Reload the game IN NEXT TICK, avoid reentrant problems.
+
+  Parameters:
+
+    [IN]  iSaveSlot - Slot of saved game.
+
+  Return value:
+
+    None.
+
+--*/
+{
+    gpGlobals->bCurrentSaveSlot = (BYTE)iSaveSlot;
+    PAL_SetLoadFlags(kLoadGlobalData | kLoadScene | kLoadPlayerSprite);
+    gpGlobals->fEnteringScene = TRUE;
+    gpGlobals->fNeedToFadeIn = TRUE;
+    gpGlobals->dwFrameNum = 0;
+}
+
+VOID
 PAL_InitGameData(
    INT         iSaveSlot
 )
@@ -919,8 +944,6 @@ PAL_InitGameData(
       PAL_LoadDefaultGame();
    }
 
-   gpGlobals->fGameStart = TRUE;
-   gpGlobals->fNeedToFadeIn = FALSE;
    gpGlobals->iCurInvMenuItem = 0;
    gpGlobals->fInBattle = FALSE;
 

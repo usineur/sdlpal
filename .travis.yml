@@ -1,9 +1,13 @@
 language: c
 os: linux
 
+git:
+  depth: false
+
 env:
   global:
     - CACHE=$HOME/.sdlpal-caches
+    - PIP=pip
 
 cache:
   directories:
@@ -16,9 +20,11 @@ jobs:
     fast_finish: true
     include:
       - os: linux
-        env: TARGET=AppImage
+        env: TARGET=AppImage EXT=AppImage
         addons:
           apt:
+            sources:
+            - sourceline: 'ppa:savoury1/games'
             packages:
             - libsdl2-dev
             - libfltk1.3-dev
@@ -32,7 +38,7 @@ jobs:
           - cd ..
 
       - os: linux
-        env: TARGET=MinGW32 SDL2_VERSION=2.0.10
+        env: TARGET=MinGW32 SDL2_VERSION=2.0.14 EXT=zip
         addons:
           apt:
             packages:
@@ -56,7 +62,6 @@ jobs:
             fi
           - ln -sf $CACHE/SDL2-$SDL2_VERSION
           - export PATH=$(pwd)/SDL2-$SDL2_VERSION/bin:$PATH
-          - cat SDL2-$SDL2_VERSION/bin/sdl2-config
           - cd ..
         script:
           - cd win32
@@ -68,7 +73,7 @@ jobs:
           - cd ..
 
       - os: linux
-        env: TARGET=MinGW32-armv7 SDL2_VERSION=2.0.10-armv7
+        env: TARGET=MinGW32-armv7 SDL2_VERSION=2.0.14-armv7 EXT=zip
         addons:
           apt:
             packages:
@@ -108,7 +113,6 @@ jobs:
           - ln -sf $CACHE/SDL2-$SDL2_VERSION
           - ln -sf $CACHE/llvm-mingw-armv7 llvm-mingw
           - export PATH=$(pwd)/SDL2-$SDL2_VERSION/bin:$(pwd)/llvm-mingw/bin:$PATH
-          - cat SDL2-$SDL2_VERSION/bin/sdl2-config
           - cd ..
         script:
           - cd win32
@@ -118,92 +122,79 @@ jobs:
           - "openssl rsa -passout pass:temporary -in key.pem -outform PVK -pvk-strong -out authenticode.pvk"
           - "openssl pkcs12 -passin pass: -in ../winrt/SDLPal.UWP/SDLPal_TemporaryKey.pfx -nokeys -nodes -out cert.pem"
           - "openssl crl2pkcs7 -nocrl -certfile cert.pem -outform DER -out authenticode.spc"
-          - "echo temporary | signcode -spc authenticode.spc -v authenticode.pvk -a sha1 -$ commercial -n SDLPal -i http://sdlpal.github.io -t http://timestamp.verisign.com/scripts/timstamp.dll -tr 10 sdlpal.exe"
+          - "echo temporary | signcode -spc authenticode.spc -v authenticode.pvk -a sha1 -$ commercial -n SDLPal -i http://sdlpal.github.io -t http://tsa.starfieldtech.com -tr 10 sdlpal.exe"
           - zip sdlpal-windows-armv7.zip sdlpal.exe
           - mv sdlpal-windows-armv7.zip ../deploy/
           - cd ..
 
       - os: linux
-        env: TARGET=wii
+        env: TARGET=wii EXT=tar.bz2
         before_install:
-          - export DEVKITPRO=$CACHE/devkitPro
-          - export DEVKITPPC=${DEVKITPRO}/devkitPPC
-          - export PATH=$DEVKITPPC/bin:$PATH
+          - echo 'DOCKER_OPTS="$DOCKER_OPTS --debug --registry-mirror=https://mirror.gcr.io"'
+          - sudo service docker restart
+          - docker system info
+          - export PUSHD="$(pwd)"
+          - mkdir -p $CACHE/
+          - cd $CACHE/
+          - docker run -dit --name devkit -v $(pwd):/cache -v $TRAVIS_BUILD_DIR:/src devkitpro/devkitppc bash
           - |
-            if ! [ -f $DEVKITPRO/libogc/include/gctypes.h ]
+            if ! [ -d $CACHE/sdl-wii ]
             then
-                rm -rfv $DEVKITPRO 
+              git clone https://github.com/dborth/sdl-wii.git
             fi
-          - |
-            if ! [ -d $DEVKITPRO ]
-            then
-                export PUSHD="$(pwd)"
-                mkdir -p $DEVKITPRO
-                (
-                    cd $DEVKITPRO &&
-                    wget https://github.com/sdlpal/tools/releases/download/sensedown/devkitPPC_r27-x86_64-linux.tar.bz2 &&
-                    wget https://github.com/sdlpal/tools/releases/download/sensedown/libogc-1.8.12.tar.bz2 &&
-                    wget https://github.com/sdlpal/tools/releases/download/sensedown/libfat-ogc-1.0.13.tar.bz2 &&
-                    wget https://github.com/dborth/sdl-wii/releases/download/2013-10-28/SDL.Wii.10-28-2013.zip
-                )&&(
-                    cd $DEVKITPRO
-                    tar xvf devkitPPC_r27-x86_64-linux.tar.bz2
-                    mkdir libogc
-                    tar xvf libogc-1.8.12.tar.bz2 -C libogc
-                    tar xvf libfat-ogc-1.0.13.tar.bz2 -C libogc
-                    unzip SDL.Wii.10-28-2013.zip
-                    rm -v *.zip *.bz2
-                    echo "cache finished!"
-                )||( 
-                    rm -rfv $DEVKITPRO 
-                    echo "download failed! clearing cache"
-                )
-            fi
+          - docker exec -it devkit make -C cache/sdl-wii/SDL install
+          - cd "${PUSHD}"
         script:
           - cd wii
-          - make
+          - docker exec -it devkit /bin/bash -ex /src/wii/.travis/docker.sh
           - tar cvjf ../deploy/sdlpal-wii.tar.bz2 icon.png meta.xml boot.dol
           - make clean
           - cd ..
           
       - os: linux
-        env: TARGET=3ds
+        env: TARGET=3ds EXT=cia
         addons:
           apt:
             packages:
             - unzip
+        services:
+          - docker
         before_install:
+          - echo 'DOCKER_OPTS="$DOCKER_OPTS --debug --registry-mirror=https://mirror.gcr.io"'
+          - sudo service docker restart
+          - docker system info
           - export PUSHD="$(pwd)"
           - mkdir -p $CACHE/
           - cd $CACHE/
-          - wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb
-          - sudo dpkg -i devkitpro-pacman.deb
-          - sudo dkp-pacman -Syu
-          - sudo dkp-pacman -S 3ds-dev --noconfirm
-          - export DEVKITPRO=/opt/devkitpro
-          - export DEVKITARM=/opt/devkitpro/devkitARM
-          - sudo chown $(whoami):$(whoami) /opt/devkitpro
-          - rm -rf SDL-1.2-N3DS
-          - git clone https://github.com/zephray/SDL-1.2-N3DS.git
-          - cd SDL-1.2-N3DS/SDL-1.2.15
-          - make -f Makefile.n3ds install
-          - wget https://github.com/profi200/Project_CTR/releases/download/0.15/makerom_015_ctrtool.zip
-          - unzip makerom_015_ctrtool.zip
-          - sudo mkdir -p /opt/ctrtool/bin
-          - sudo cp Linux_x86_64/* /opt/ctrtool/bin/
-          - sudo chmod +x /opt/ctrtool/bin/*
-          - export PATH=/opt/ctrtool/bin:$PATH
+          - docker run -dit --name devkit -v $(pwd):/cache -v $TRAVIS_BUILD_DIR:/src devkitpro/devkitarm bash
+          - |
+            if ! [ -d $CACHE/SDL-1.2-N3DS ]
+            then
+              git clone https://github.com/zephray/SDL-1.2-N3DS.git
+            fi
+          - docker exec -it devkit make -C cache/SDL-1.2-N3DS/SDL-1.2.15 -f Makefile.n3ds install
+          - |
+            if ! [ -f $CACHE/makerom ]
+            then
+              wget https://github.com/3DSGuy/Project_CTR/releases/download/makerom-v0.17/makerom-v0.17-ubuntu_x86_64.zip
+              unzip -o makerom-v0.17-ubuntu_x86_64.zip
+              chmod +x makerom
+            fi
+          - docker exec -it devkit cp /cache/makerom /opt/devkitpro/tools/bin
           - cd "${PUSHD}"
         script:
           - cd 3ds
-          - make
-          - make cia
+          - docker exec -it devkit make -C src/3ds cia
           - cp sdlpal.cia ../deploy/sdlpal-3ds.cia
           - cd ..
 
       - os: linux
         language: android
-        env: TARGET=Android ANDROID_BUILD_TOOLS=28.0.3 NDK_VERSION=r16 TERM=dumb
+        env: TARGET=Android ANDROID_BUILD_TOOLS=28.0.3 NDK_VERSION=r16 TERM=dumb EXT=apk PIP="sudo pip3"
+        addons:
+          apt:
+            packages:
+            - python3-pip
         android:
           components:
           - tools
@@ -255,8 +246,8 @@ jobs:
             fi
 
       - os: osx
-        osx_image: xcode11
-        env: TARGET=iOS
+        osx_image: xcode12.3
+        env: TARGET=iOS EXT=ipa
         cache: cocoapods
         podfile: ios/SDLPal/Podfile
         script:
@@ -269,8 +260,8 @@ jobs:
           - cd ../..
 
       - os: osx
-        osx_image: xcode11
-        env: TARGET=macOS
+        osx_image: xcode12.3
+        env: TARGET=macOS EXT=dmg
         language: objective-c
         script:
           - cd macos
@@ -281,7 +272,7 @@ jobs:
 
       - os: osx
         osx_image: xcode9.2
-        env: TARGET=macOS SDL=1.2.15
+        env: TARGET=macOS-SDL1 SDL=1.2.15 EXT=dmg PIP=pip3
         before_install:
           - |
             if ! [ -d /Library/Frameworks/SDL.framework ]
@@ -304,17 +295,25 @@ jobs:
           - xcodebuild -project Pal_SDL12.xcodeproj -configuration Release
           - hdiutil create -srcfolder build/Release/Pal.app -volname "SDLPal-SDL1" ../deploy/sdlpal-sdl1-macos.dmg
           - cd ..
+        after_success:
+          - HOMEBREW_NO_AUTO_UPDATE=1 brew install python3
 
       - os: linux
         language: node_js
-        env: TARGET=Emscripten TAG=1.39.8-upstream
+        env: TARGET=Emscripten TAG=1.39.8-upstream EXT=zip
         services:
           - docker
         before_install:
+          - echo 'DOCKER_OPTS="$DOCKER_OPTS --debug --registry-mirror=https://mirror.gcr.io"'
+          - sudo service docker restart
+          - docker system info
           - docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:$TAG bash
         script:
           - sed -i 's@http://localhost:8080/@https://sdlpal.github.io/demo/@g' emscripten/Makefile
           - docker exec -it emscripten emmake make -C emscripten
+          - cd emscripten
+          - zip ../deploy/sdlpal-emscripten.zip *.{html,js,wasm,wasm.map,png}
+          - cd ..
 
 before_deploy:
   - |
@@ -329,22 +328,10 @@ before_deploy:
     fi
   - CI=$(git show -s --format=%cI)
   - DATE=${CI%T*}
+  - REV=$(git rev-list --count HEAD)
   - COMMIT=$(git rev-parse --short HEAD)
-  - VERSION=v$DATE-g$COMMIT
-  - set -f
-  - |
-    sed -i.bak "
-    s/@VERSION@/$VERSION/g
-    s/@DESC@/$(echo -n $TRAVIS_COMMIT_MESSAGE|tr '\r' '\\r'|tr '\n' '\\n'|sed -e 's@[\\"]@\\&@g;s@[/&\$]@\\&@g')/g
-    s/@RELEASE_DATE@/$(git show -s --format=%cI)/g
-    s/@VCS_TAG@/$(git describe --tags)/g
-    s/@AUTHOR@/$(git show -s --format=%an)/g
-    s/@AUTHOR_DATE@/$(git show -s --format=%ai)/g
-    s/@CIMMITER@/$(git show -s --format=%cn)/g
-    s/@BRANCH@/$TRAVIS_BRANCH/g
-    s/@COMMITID@/$(git show -s --format=%h)/g
-    " bintray.json
-  - set +f
+  - VERSION=v$DATE-r$REV-g$COMMIT
+  - $PIP install cloudsmith-cli
   - git config --global user.email "sdlpal@sdlpal.com"
   - git config --global user.name "SDLPAL"
 
@@ -360,8 +347,7 @@ deploy:
     on:
       branch: master
   - provider: releases
-    token:
-      secure: FFV8UBcz6GkeSoGRbrL9tnTpVqXoFjFK2QtW0Ml8YvvqaHhxOaIWs2nAabOGsW1mJop/QlpuUNw1TfLl7TokcUDgOHrFRdC8hVY7K1uSWMnt7m4ZRPatVybIkzgrnItHlnMrL4uJK2xXb6Jc5+cSrU5jRMcmTZjaOKLTBwF97+6AgqpdmKUCVYZJzQYg0Jn9GfaL1EOGl7ISt/VEgi/tKFzJvJVxJBU3NuKyxXlfEwkTiSOFuGoD5qWDjCE+aGxTR6RQefsADPIDfeU3TJHTJE/ORGy9gl+Y41JgU0Bfgipcqg1RSwNclclmxgi8lo/XNUiZAMTyQrXjByBWcvYovk+H4h9mbvJlrVSjI8Wxb5ICcYkhDVkNxtEXX7AsIk4yHiNTi1MAW0qJJKinaFxLmK2U3LGEK3DudXl/0eVRoQATmRcXLdBQezISt2CWpTktCxlQmtz/GsoHv0PcWdkJYL4qbbRrBRFj9++VjlnCI124YZnbVjC3+jtWN1Zluxynj0GDBY3r7EdLWWKZo5XnygPOZ8+uaTMYfqmTvQWPc5GRRRdVJowQFQhb48hzKyWYqsf8eyS3VuZ9b/DwES3dutOaX7sIL9Vkg3DlQYOEz938MB4VbTGizUUrBbrIP4Kz/+WOZ9pxM9X+qsgMYkw8FvHqn2TvCWxPDCgqq3zUWig=
+    token: $GITHUB_TOKEN
     file_glob: true
     file: deploy/*
     skip_cleanup: true
@@ -369,20 +355,11 @@ deploy:
     on:
       all_branches: true
       tags: true
-  - provider: bintray
-    user: $BINTRAY_USER
-    key: $BINTRAY_KEY
-    file: bintray.json
-    skip_cleanup: true
+  - provider: script
+    edge: true
+    script: cloudsmith push raw sdlpal/sdlpal --version $VERSION --name $TARGET --republish deploy/*.$EXT --tags "branch/$TRAVIS_BRANCH"
     on:
       all_branches: true
-
-after_deploy:
-  - curl -sS -u "$BINTRAY_USER:$BINTRAY_KEY" -X PATCH "https://api.bintray.com/packages/sdlpal/nightly/$TRAVIS_BRANCH" -H "Content-Type:application/json" -d '{"github_repo":"sdlpal/sdlpal"}'
-  - curl -sS -u "$BINTRAY_USER:$BINTRAY_KEY" -X POST "https://api.bintray.com/packages/sdlpal/nightly/$TRAVIS_BRANCH/readme" -H "Content-Type:application/json" -d '{"github":{"github_repo":"sdlpal/sdlpal"}}'
-  - FILE=$(ls deploy)
-  - sleep 10
-  - curl -sS -u "$BINTRAY_USER:$BINTRAY_KEY" -X PUT "https://api.bintray.com/file_metadata/sdlpal/nightly/$VERSION/$FILE" -H "Content-Type:application/json" -d '{"list_in_downloads":true}'
 
 notifications:
   webhooks:

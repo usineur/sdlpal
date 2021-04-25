@@ -7,6 +7,7 @@
 # define PAL_HAS_MP3           0
 # define PAL_HAS_OGG           0
 # define PAL_HAS_OPUS          0
+# define PAL_HAS_NATIVEMIDI    0
 # define PAL_PREFIX            "."
 # define PAL_SAVE_PREFIX       "."
 

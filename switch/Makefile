@@ -4,12 +4,12 @@ INTER     = .switch
 
 PREFIX    = $(DEVKITA64)/bin/aarch64-none-elf
 
-SOURCES   = . .. ../adplug
+SOURCES   = . .. ../adplug ../timidity
 CFILES    = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES  = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES    = $(CFILES:.c=$(INTER).o) $(CPPFILES:.cpp=$(INTER).o)
 
-CCFLAGS   = -D__SWITCH__ -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE -O3 -I. -I..
+CCFLAGS   = -D__SWITCH__ -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE -O3 -I. -I.. -I../timidity
 CCFLAGS  += -I$(DEVKITPRO)/portlibs/switch/include -I$(DEVKITPRO)/portlibs/switch/include/SDL2 -I$(DEVKITPRO)/libnx/include
 CXXFLAGS  = $(CCFLAGS) -std=c++11
 CFLAGS    = $(CCFLAGS) -std=gnu99 -D_GNU_SOURCE

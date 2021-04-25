@@ -5,12 +5,12 @@ INTER    = .vita
 
 PREFIX   = $(VITASDK)/bin/arm-vita-eabi
 
-SOURCES  = . .. ../adplug
+SOURCES  = . .. ../adplug ../timidity
 CFILES   = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp))
 OFILES   = $(CFILES:.c=$(INTER).o) $(CPPFILES:.cpp=$(INTER).o)
 
-CCFLAGS  = -Wl,-q -O3 -g -I. -I.. -I$(VITASDK)/arm-vita-eabi/include/SDL2 -I$(VITASDK)/arm-vita-eabi/include/vitashaders
+CCFLAGS  = -Wl,-q -O3 -g -I. -I.. -I../timidity -I$(VITASDK)/arm-vita-eabi/include/SDL2 -I$(VITASDK)/arm-vita-eabi/include/vitashaders
 CXXFLAGS = $(CCFLAGS) -std=c++11
 CFLAGS   = $(CCFLAGS) -std=gnu99 -D_GNU_SOURCE
 LDFLAGS  = -lSDL2 -lvita2d_fbo -lvitashaders \

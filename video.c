@@ -1,15 +1,14 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2020, SDLPAL development team.
+// Copyright (c) 2011-2021, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
 //
 // SDLPAL is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// it under the terms of the GNU General Public License, version 3
+// as published by the Free Software Foundation.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -260,19 +259,21 @@ VIDEO_Startup(
    //
    if (gConfig.fUseTouchOverlay)
    {
-      extern const void * PAL_LoadOverlayBMP(void);
-      extern int PAL_OverlayBMPLength();
+      extern const unsigned char bmpData[];
+      extern unsigned int bmpLen;
 
-      const void *bmp = PAL_LoadOverlayBMP();
-      SDL_Surface *overlay = SDL_LoadBMP_RW(SDL_RWFromConstMem(bmp, PAL_OverlayBMPLength()), 1);
-      free((void*)bmp);
+      void *bmp = UTIL_malloc(bmpLen);
+      YJ1_Decompress(bmpData, bmp, bmpLen);
+      SDL_Surface *overlay = SDL_LoadBMP_RW(SDL_RWFromConstMem(bmp, bmpLen), 1);
+      free(bmp);
+
       if (overlay != NULL)
       {
          SDL_SetColorKey(overlay, SDL_RLEACCEL, SDL_MapRGB(overlay->format, 255, 0, 255));
          SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, gConfig.pszScaleQuality);
          gpTouchOverlay = SDL_CreateTextureFromSurface(gpRenderer, overlay);
          SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-         SDL_SetTextureAlphaMod(gpTouchOverlay, 120);
+         SDL_SetTextureAlphaMod(gpTouchOverlay, TOUCHOVERLAY_ALPHAMOD );
          SDL_FreeSurface(overlay);
       }
    }
@@ -286,7 +287,7 @@ VIDEO_Startup(
    {
 	   BYTE pixels[4*PIXELS*PIXELS];
 	   memset(pixels, 0, sizeof(pixels));
-	   SDL_Surface *temp = SDL_CreateRGBSurfaceFrom(pixels, PIXELS, PIXELS, 32, PIXELS, 0, 0, 0, 0);
+	   SDL_Surface *temp = SDL_CreateRGBSurfaceFrom(pixels, PIXELS, PIXELS, 32, PIXELS, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
 	   gpTouchOverlay = SDL_CreateTextureFromSurface(gpRenderer, temp);
 	   SDL_FreeSurface(temp);
    }

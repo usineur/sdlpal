@@ -1,15 +1,14 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2020, SDLPAL development team.
+// Copyright (c) 2011-2021, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
 //
 // SDLPAL is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// it under the terms of the GNU General Public License, version 3
+// as published by the Free Software Foundation.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,6 +23,7 @@
 #include "global.h"
 #include "palcfg.h"
 
+PAL_FORCE_INLINE
 BYTE
 PAL_CalcShadowColor(
    BYTE bSourceColor
@@ -71,14 +71,16 @@ PAL_RLEBlitToSurfaceWithShadow(
 
 --*/
 {
-   UINT          i, j;
+   UINT          i, j, k, sx;
    INT           x, y;
    UINT          uiLen       = 0;
    UINT          uiWidth     = 0;
    UINT          uiHeight    = 0;
+   UINT          uiSrcX      = 0;
    BYTE          T;
    INT           dx          = PAL_X(pos);
    INT           dy          = PAL_Y(pos);
+   LPBYTE        p;
 
    //
    // Check for NULL pointer.
@@ -104,6 +106,15 @@ PAL_RLEBlitToSurfaceWithShadow(
    uiHeight = lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
 
    //
+   // Check whether bitmap intersects the surface.
+   //
+   if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
+       uiHeight + dy <= 0 || dy >= lpDstSurface->h)
+   {
+      goto end;
+   }
+
+   //
    // Calculate the total length of the bitmap.
    // The bitmap is 8-bpp, each pixel will use 1 byte.
    //
@@ -119,52 +130,107 @@ PAL_RLEBlitToSurfaceWithShadow(
       if ((T & 0x80) && T <= 0x80 + uiWidth)
       {
          i += T - 0x80;
+         uiSrcX += T - 0x80;
+         if (uiSrcX >= uiWidth)
+         {
+            uiSrcX -= uiWidth;
+            dy++;
+         }
       }
       else
       {
-         for (j = 0; j < T; j++)
-         {
-            //
-            // Calculate the destination coordination.
-            // FIXME: This could be optimized
-            //
-            y = (i + j) / uiWidth + dy;
-            x = (i + j) % uiWidth + dx;
+         //
+         // Prepare coordinates.
+         //
+         j = 0;
+         sx = uiSrcX;
+         x = dx + uiSrcX;
+         y = dy;
 
+         //
+         // Skip the points which are out of the surface.
+         //
+         if (y < 0)
+         {
+            j += -y * uiWidth;
+            y = 0;
+         }
+         else if (y >= lpDstSurface->h)
+         {
+            goto end; // No more pixels needed, break out
+         }
+
+         while (j < T)
+         {
             //
             // Skip the points which are out of the surface.
             //
             if (x < 0)
             {
-               j += -x - 1;
-               continue;
+               j += -x;
+               if (j >= T) break;
+               sx += -x;
+               x = 0;
             }
             else if (x >= lpDstSurface->w)
             {
-               j += x - lpDstSurface->w;
+               j += uiWidth - sx;
+               x -= sx;
+               sx = 0;
+               y++;
+               if (y >= lpDstSurface->h)
+               {
+                  goto end; // No more pixels needed, break out
+               }
                continue;
             }
 
-            if (y < 0)
-            {
-               j += -y * uiWidth - 1;
-               continue;
-            }
-            else if (y >= lpDstSurface->h)
-            {
-               goto end; // No more pixels needed, break out
-            }
-
             //
-            // Put the pixel onto the surface (FIXME: inefficient).
+            // Put the pixels in row onto the surface
             //
+            k = T - j;
+            if (lpDstSurface->w - x < k) k = lpDstSurface->w - x;
+            if (uiWidth - sx < k) k = uiWidth - sx;
+            sx += k;
+            p = ((LPBYTE)lpDstSurface->pixels) + y * lpDstSurface->pitch;
             if(bShadow)
-               ((LPBYTE)lpDstSurface->pixels)[y * lpDstSurface->pitch + x] = PAL_CalcShadowColor(((LPBYTE)lpDstSurface->pixels)[y * lpDstSurface->pitch + x]);
+            {
+               j += k;
+               for (; k != 0; k--)
+               {
+                  p[x] = PAL_CalcShadowColor(p[x]);
+                  x++;
+               }
+            }
             else
-               ((LPBYTE)lpDstSurface->pixels)[y * lpDstSurface->pitch + x] = lpBitmapRLE[j];
+            {
+               for (; k != 0; k--)
+               {
+                  p[x] = lpBitmapRLE[j];
+                  j++;
+                  x++;
+               }
+            }
+
+            if (sx >= uiWidth)
+            {
+               sx -= uiWidth;
+               x -= uiWidth;
+               y++;
+               if (y >= lpDstSurface->h)
+               {
+                  goto end; // No more pixels needed, break out
+               }
+            }
          }
          lpBitmapRLE += T;
          i += T;
+         uiSrcX += T;
+         while (uiSrcX >= uiWidth)
+         {
+            uiSrcX -= uiWidth;
+            dy++;
+         }
       }
    }
 
@@ -204,14 +270,16 @@ PAL_RLEBlitWithColorShift(
 
 --*/
 {
-   UINT          i, j;
+   UINT          i, j, k, sx;
    INT           x, y;
    UINT          uiLen       = 0;
    UINT          uiWidth     = 0;
    UINT          uiHeight    = 0;
+   UINT          uiSrcX      = 0;
    BYTE          T, b;
    INT           dx          = PAL_X(pos);
    INT           dy          = PAL_Y(pos);
+   LPBYTE        p;
 
    //
    // Check for NULL pointer.
@@ -237,6 +305,15 @@ PAL_RLEBlitWithColorShift(
    uiHeight = lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
 
    //
+   // Check whether bitmap intersects the surface.
+   //
+   if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
+       uiHeight + dy <= 0 || dy >= lpDstSurface->h)
+   {
+      goto end;
+   }
+
+   //
    // Calculate the total length of the bitmap.
    // The bitmap is 8-bpp, each pixel will use 1 byte.
    //
@@ -252,64 +329,109 @@ PAL_RLEBlitWithColorShift(
       if ((T & 0x80) && T <= 0x80 + uiWidth)
       {
          i += T - 0x80;
+         uiSrcX += T - 0x80;
+         if (uiSrcX >= uiWidth)
+         {
+            uiSrcX -= uiWidth;
+            dy++;
+         }
       }
       else
       {
-         for (j = 0; j < T; j++)
-         {
-            //
-            // Calculate the destination coordination.
-            // FIXME: This could be optimized
-            //
-            y = (i + j) / uiWidth + dy;
-            x = (i + j) % uiWidth + dx;
+         //
+         // Prepare coordinates.
+         //
+         j = 0;
+         sx = uiSrcX;
+         x = dx + uiSrcX;
+         y = dy;
 
+         //
+         // Skip the points which are out of the surface.
+         //
+         if (y < 0)
+         {
+            j += -y * uiWidth;
+            y = 0;
+         }
+         else if (y >= lpDstSurface->h)
+         {
+            goto end; // No more pixels needed, break out
+         }
+
+         while (j < T)
+         {
             //
             // Skip the points which are out of the surface.
             //
             if (x < 0)
             {
-               j += -x - 1;
-               continue;
+               j += -x;
+               if (j >= T) break;
+               sx += -x;
+               x = 0;
             }
             else if (x >= lpDstSurface->w)
             {
-               j += x - lpDstSurface->w;
+               j += uiWidth - sx;
+               x -= sx;
+               sx = 0;
+               y++;
+               if (y >= lpDstSurface->h)
+               {
+                  goto end; // No more pixels needed, break out
+               }
                continue;
             }
 
-            if (y < 0)
+            //
+            // Put the pixels in row onto the surface
+            //
+            k = T - j;
+            if (lpDstSurface->w - x < k) k = lpDstSurface->w - x;
+            if (uiWidth - sx < k) k = uiWidth - sx;
+            sx += k;
+            p = ((LPBYTE)lpDstSurface->pixels) + y * lpDstSurface->pitch;
+            for (; k != 0; k--)
             {
-               j += -y * uiWidth - 1;
-               continue;
-            }
-            else if (y >= lpDstSurface->h)
-            {
-               goto end; // No more pixels needed, break out
+               b = (lpBitmapRLE[j] & 0x0F);
+               if ((INT)b + iColorShift > 0x0F)
+               {
+                  b = 0x0F;
+               }
+               else if ((INT)b + iColorShift < 0)
+               {
+                  b = 0;
+               }
+               else
+               {
+                  b += iColorShift;
+               }
+
+               p[x] = (b | (lpBitmapRLE[j] & 0xF0));
+               j++;
+               x++;
             }
 
-            //
-            // Put the pixel onto the surface (FIXME: inefficient).
-            //
-            b = (lpBitmapRLE[j] & 0x0F);
-            if ((INT)b + iColorShift > 0x0F)
+            if (sx >= uiWidth)
             {
-               b = 0x0F;
+               sx -= uiWidth;
+               x -= uiWidth;
+               y++;
+               if (y >= lpDstSurface->h)
+               {
+                  goto end; // No more pixels needed, break out
+               }
             }
-            else if ((INT)b + iColorShift < 0)
-            {
-               b = 0;
-            }
-            else
-            {
-               b += iColorShift;
-            }
-
-            ((LPBYTE)lpDstSurface->pixels)[y * lpDstSurface->pitch + x] =
-               (b | (lpBitmapRLE[j] & 0xF0));
          }
          lpBitmapRLE += T;
          i += T;
+         uiSrcX += T;
+         while (uiSrcX >= uiWidth)
+         {
+            uiSrcX -= uiWidth;
+            dy++;
+         }
       }
    }
 
@@ -352,14 +474,16 @@ PAL_RLEBlitMonoColor(
 
 --*/
 {
-   UINT          i, j;
+   UINT          i, j, k, sx;
    INT           x, y;
    UINT          uiLen       = 0;
    UINT          uiWidth     = 0;
    UINT          uiHeight    = 0;
+   UINT          uiSrcX      = 0;
    BYTE          T, b;
    INT           dx          = PAL_X(pos);
    INT           dy          = PAL_Y(pos);
+   LPBYTE        p;
 
    //
    // Check for NULL pointer.
@@ -385,6 +509,15 @@ PAL_RLEBlitMonoColor(
    uiHeight = lpBitmapRLE[2] | (lpBitmapRLE[3] << 8);
 
    //
+   // Check whether bitmap intersects the surface.
+   //
+   if (uiWidth + dx <= 0 || dx >= lpDstSurface->w ||
+       uiHeight + dy <= 0 || dy >= lpDstSurface->h)
+   {
+      goto end;
+   }
+
+   //
    // Calculate the total length of the bitmap.
    // The bitmap is 8-bpp, each pixel will use 1 byte.
    //
@@ -401,62 +534,109 @@ PAL_RLEBlitMonoColor(
       if ((T & 0x80) && T <= 0x80 + uiWidth)
       {
          i += T - 0x80;
+         uiSrcX += T - 0x80;
+         if (uiSrcX >= uiWidth)
+         {
+            uiSrcX -= uiWidth;
+            dy++;
+         }
       }
       else
       {
-         for (j = 0; j < T; j++)
-         {
-            //
-            // Calculate the destination coordination.
-            // FIXME: This could be optimized
-            //
-            y = (i + j) / uiWidth + dy;
-            x = (i + j) % uiWidth + dx;
+         //
+         // Prepare coordinates.
+         //
+         j = 0;
+         sx = uiSrcX;
+         x = dx + uiSrcX;
+         y = dy;
 
+         //
+         // Skip the points which are out of the surface.
+         //
+         if (y < 0)
+         {
+            j += -y * uiWidth;
+            y = 0;
+         }
+         else if (y >= lpDstSurface->h)
+         {
+            goto end; // No more pixels needed, break out
+         }
+
+         while (j < T)
+         {
             //
             // Skip the points which are out of the surface.
             //
             if (x < 0)
             {
-               j += -x - 1;
-               continue;
+               j += -x;
+               if (j >= T) break;
+               sx += -x;
+               x = 0;
             }
             else if (x >= lpDstSurface->w)
             {
-               j += x - lpDstSurface->w;
+               j += uiWidth - sx;
+               x -= sx;
+               sx = 0;
+               y++;
+               if (y >= lpDstSurface->h)
+               {
+                  goto end; // No more pixels needed, break out
+               }
                continue;
             }
 
-            if (y < 0)
+            //
+            // Put the pixels in row onto the surface
+            //
+            k = T - j;
+            if (lpDstSurface->w - x < k) k = lpDstSurface->w - x;
+            if (uiWidth - sx < k) k = uiWidth - sx;
+            sx += k;
+            p = ((LPBYTE)lpDstSurface->pixels) + y * lpDstSurface->pitch;
+            for (; k != 0; k--)
             {
-               j += -y * uiWidth - 1;
-               continue;
-            }
-            else if (y >= lpDstSurface->h)
-            {
-               goto end; // No more pixels needed, break out
+               b = lpBitmapRLE[j] & 0x0F;
+               if ((INT)b + iColorShift > 0x0F)
+               {
+                  b = 0x0F;
+               }
+               else if ((INT)b + iColorShift < 0)
+               {
+                  b = 0;
+               }
+               else
+               {
+                  b += iColorShift;
+               }
+
+               p[x] = (b | bColor);
+               j++;
+               x++;
             }
 
-            //
-            // Put the pixel onto the surface (FIXME: inefficient).
-            //
-            b = lpBitmapRLE[j] & 0x0F;
-            if ((INT)b + iColorShift > 0x0F)
+            if (sx >= uiWidth)
             {
-               b = 0x0F;
+               sx -= uiWidth;
+               x -= uiWidth;
+               y++;
+               if (y >= lpDstSurface->h)
+               {
+                  goto end; // No more pixels needed, break out
+               }
             }
-            else if ((INT)b + iColorShift < 0)
-            {
-               b = 0;
-            }
-            else
-            {
-               b += iColorShift;
-            }
-            ((LPBYTE)lpDstSurface->pixels)[y * lpDstSurface->pitch + x] = (b | bColor);
          }
          lpBitmapRLE += T;
          i += T;
+         uiSrcX += T;
+         while (uiSrcX >= uiWidth)
+         {
+            uiSrcX -= uiWidth;
+            dy++;
+         }
       }
    }
 

@@ -1,15 +1,14 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2020, SDLPAL development team.
+// Copyright (c) 2011-2021, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
 //
 // SDLPAL is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// it under the terms of the GNU General Public License, version 3
+// as published by the Free Software Foundation.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -62,11 +61,9 @@ PAL_GameUpdate(
          gpGlobals->fEnteringScene = FALSE;
 
          i = gpGlobals->wNumScene - 1;
-         wResult = PAL_RunTriggerScript(gpGlobals->g.rgScene[i].wScriptOnEnter, 0xFFFF);
-         if (!gpGlobals->fGameStart)
-            gpGlobals->g.rgScene[i].wScriptOnEnter = wResult;
+         gpGlobals->g.rgScene[i].wScriptOnEnter = PAL_RunTriggerScript(gpGlobals->g.rgScene[i].wScriptOnEnter, 0xFFFF);
 
-         if (gpGlobals->fEnteringScene || gpGlobals->fGameStart)
+         if (gpGlobals->fEnteringScene)
          {
             //
             // Don't go further as we're switching to another scene
@@ -166,7 +163,7 @@ PAL_GameUpdate(
 
                PAL_ClearKeyState();
 
-               if (gpGlobals->fEnteringScene || gpGlobals->fGameStart)
+               if (gpGlobals->fEnteringScene)
                {
                   //
                   // Don't go further on scene switching
@@ -193,7 +190,7 @@ PAL_GameUpdate(
          if (wScriptEntry != 0)
          {
             p->wAutoScript = PAL_RunAutoScript(wScriptEntry, wEventObjectID);
-            if (gpGlobals->fEnteringScene || gpGlobals->fGameStart)
+            if (gpGlobals->fEnteringScene)
             {
                //
                // Don't go further on scene switching

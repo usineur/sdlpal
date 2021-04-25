@@ -88,7 +88,7 @@
 		7165528B195BB6DB006E1227 /* uigame.c in Sources */ = {isa = PBXBuildFile; fileRef = 7165524F195BB6DB006E1227 /* uigame.c */; };
 		7165528D195BB6DB006E1227 /* video.c in Sources */ = {isa = PBXBuildFile; fileRef = 71655253195BB6DB006E1227 /* video.c */; };
 		7165528E195BB6DB006E1227 /* yj1.c in Sources */ = {isa = PBXBuildFile; fileRef = 71655255195BB6DB006E1227 /* yj1.c */; };
-		71655292195BBCD6006E1227 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 71655291195BBCD6006E1227 /* OpenGLES.framework */; };
+		71655292195BBCD6006E1227 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 71655291195BBCD6006E1227 /* OpenGLES.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		716552AA195BBE1B006E1227 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 716552A9195BBE1B006E1227 /* CoreAudio.framework */; };
 		716552AE195BBE7D006E1227 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 716552AD195BBE7D006E1227 /* AudioToolbox.framework */; };
 		716552B0195BBECE006E1227 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 716552AF195BBECE006E1227 /* QuartzCore.framework */; };
@@ -113,6 +113,8 @@
 		C66F6FD81FB16CB200F3F0DA /* iOS Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C66F6FD51FB16CB200F3F0DA /* iOS Launch Screen.storyboard */; };
 		C6743A841ECCAFA700AEF782 /* SettingsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C6743A831ECCAFA700AEF782 /* SettingsTableViewController.m */; };
 		C694CF871EB6197C0006F937 /* gs_instruments.dls in Resources */ = {isa = PBXBuildFile; fileRef = C694CF861EB619660006F937 /* gs_instruments.dls */; };
+		C69D0A4825C1446A00FF3EFF /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C69D0A4725C1446A00FF3EFF /* CoreHaptics.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		C69D0AAF25C1465200FF3EFF /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C69D0A9B25C1463000FF3EFF /* libSDL2.a */; };
 		C6CFDE9723A859F800DEB8F9 /* kiss_fft.c in Sources */ = {isa = PBXBuildFile; fileRef = C6CFDD6723A859F800DEB8F9 /* kiss_fft.c */; };
 		C6CFDE9823A859F800DEB8F9 /* rate.c in Sources */ = {isa = PBXBuildFile; fileRef = C6CFDD6F23A859F800DEB8F9 /* rate.c */; };
 		C6CFDE9923A859F800DEB8F9 /* opus_mdct.c in Sources */ = {isa = PBXBuildFile; fileRef = C6CFDD7123A859F800DEB8F9 /* opus_mdct.c */; };
@@ -255,59 +257,118 @@
 		C6CFDF4923A859F800DEB8F9 /* opus_stream.c in Sources */ = {isa = PBXBuildFile; fileRef = C6CFDE8323A859F800DEB8F9 /* opus_stream.c */; };
 		C6CFDF4A23A859F800DEB8F9 /* mapping_matrix.c in Sources */ = {isa = PBXBuildFile; fileRef = C6CFDE8423A859F800DEB8F9 /* mapping_matrix.c */; };
 		C6CFDF4B23A859F800DEB8F9 /* opus_multistream.c in Sources */ = {isa = PBXBuildFile; fileRef = C6CFDE8523A859F800DEB8F9 /* opus_multistream.c */; };
-		C6E974A21E49C24500F76B17 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C6E9749D1E49C22D00F76B17 /* libSDL2.a */; };
+		C6D61DE52619A6A4000622C2 /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DCD2619A6A4000622C2 /* common.c */; };
+		C6D61DE62619A6A4000622C2 /* tables.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DCE2619A6A4000622C2 /* tables.c */; };
+		C6D61DE82619A6A4000622C2 /* readmidi.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DD12619A6A4000622C2 /* readmidi.c */; };
+		C6D61DEB2619A6A4000622C2 /* instrum.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DD52619A6A4000622C2 /* instrum.c */; };
+		C6D61DEE2619A6A4000622C2 /* resample.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DDC2619A6A4000622C2 /* resample.c */; };
+		C6D61DF02619A6A4000622C2 /* mix.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DDF2619A6A4000622C2 /* mix.c */; };
+		C6D61DF12619A6A4000622C2 /* playmidi.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DE02619A6A4000622C2 /* playmidi.c */; };
+		C6D61DF22619A6A4000622C2 /* output.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DE22619A6A4000622C2 /* output.c */; };
+		C6D61DF32619A6A4000622C2 /* timidity.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DE32619A6A4000622C2 /* timidity.c */; };
+		C6D61DF72619A6B3000622C2 /* midi_timidity.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DF52619A6B2000622C2 /* midi_timidity.c */; };
+		C6D61DF82619A6B3000622C2 /* midi_tsf.c in Sources */ = {isa = PBXBuildFile; fileRef = C6D61DF62619A6B3000622C2 /* midi_tsf.c */; };
 		F9BC4A0C6F1B983EB45414F3 /* libPods-SDLPal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2765B76B4AC93B4F654F1289 /* libPods-SDLPal.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		C6CFDE8F23A859F800DEB8F9 /* PBXContainerItemProxy */ = {
+		C69D0A9225C1463000FF3EFF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 52ED1E5C222889500061FCE0;
-			remoteInfo = "libSDL-iOS-dylib";
+			remoteGlobalIDString = BECDF66C0761BA81005FE872;
+			remoteInfo = Framework;
 		};
-		C6CFDE9123A859F800DEB8F9 /* PBXContainerItemProxy */ = {
+		C69D0A9425C1463000FF3EFF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = F3E3C7572241389A007D243C;
-			remoteInfo = "libSDL-tvOS-dylib";
+			remoteGlobalIDString = A7D88B5423E2437C00DCD162;
+			remoteInfo = "Framework-iOS";
 		};
-		C6CFDE9323A859F800DEB8F9 /* PBXContainerItemProxy */ = {
+		C69D0A9625C1463000FF3EFF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = F3E3C65222406928007D243C;
-			remoteInfo = "libSDLmain-iOS";
+			remoteGlobalIDString = A7D88D1523E24BED00DCD162;
+			remoteInfo = "Framework-tvOS";
 		};
-		C6CFDE9523A859F800DEB8F9 /* PBXContainerItemProxy */ = {
+		C69D0A9825C1463000FF3EFF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = F3E3C75F224138AE007D243C;
-			remoteInfo = "libSDLmain-tvOS";
+			remoteGlobalIDString = BECDF6B30761BA81005FE872;
+			remoteInfo = "Static Library";
 		};
-		C6E9749C1E49C22D00F76B17 /* PBXContainerItemProxy */ = {
+		C69D0A9A25C1463000FF3EFF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = FD6526630DE8FCCB002AD96B;
-			remoteInfo = libSDL;
+			remoteGlobalIDString = A7D88E5423E24D3B00DCD162;
+			remoteInfo = "Static Library-iOS";
 		};
-		C6E9749E1E49C22D00F76B17 /* PBXContainerItemProxy */ = {
+		C69D0A9C25C1463000FF3EFF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = FAB598141BB5C1B100BE72C5;
-			remoteInfo = "libSDL-tv";
+			remoteGlobalIDString = A769B23D23E259AE00872273;
+			remoteInfo = "Static Library-tvOS";
 		};
-		C6E974A01E49C23B00F76B17 /* PBXContainerItemProxy */ = {
+		C69D0A9E25C1463000FF3EFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DB31407717554B71006C0E22;
+			remoteInfo = "Shared Library";
+		};
+		C69D0AA025C1463000FF3EFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A75FCEB323E25AB700529352;
+			remoteInfo = "Shared Library-iOS";
+		};
+		C69D0AA225C1463000FF3EFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A75FD06C23E25AC700529352;
+			remoteInfo = "Shared Library-tvOS";
+		};
+		C69D0AA425C1463000FF3EFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = BECDF6BE0761BA81005FE872;
+			remoteInfo = "Standard DMG";
+		};
+		C69D0AA625C1463000FF3EFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A75FDB8C23E4C74400529352;
+			remoteInfo = hidapi;
+		};
+		C69D0AA825C1463000FF3EFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A75FDB4923E399AC00529352;
+			remoteInfo = "hidapi-iOS";
+		};
+		C69D0AAA25C1463000FF3EFF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A75FDB6E23E3A2C900529352;
+			remoteInfo = "hidapi-tvOS";
+		};
+		C69D0AAC25C1463C00FF3EFF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
-			remoteInfo = libSDL;
+			remoteGlobalIDString = A7D88D1723E24D3B00DCD162;
+			remoteInfo = "Static Library-iOS";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -519,7 +580,7 @@
 		C6153B9E1EEE2ECD00DFFCAA /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C6153BA01EEE2ED300DFFCAA /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C6153BA11EEE2ED600DFFCAA /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = "../../3rd/SDL/Xcode-iOS/SDL/SDL.xcodeproj"; sourceTree = "<group>"; };
+		C622BE4E1E474AAF000C8970 /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = ../../3rd/SDL/Xcode/SDL/SDL.xcodeproj; sourceTree = "<group>"; };
 		C622BE641E474B5E000C8970 /* audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = audio.c; path = ../../../audio.c; sourceTree = "<group>"; };
 		C622BE651E474B5E000C8970 /* audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = audio.h; path = ../../../audio.h; sourceTree = "<group>"; };
 		C622BE6A1E474C01000C8970 /* palcfg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = palcfg.c; path = ../../../palcfg.c; sourceTree = "<group>"; };
@@ -532,6 +593,7 @@
 		C629A565208643D20015C93C /* nuked_opl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nuked_opl.c; sourceTree = "<group>"; };
 		C629A568208643D20015C93C /* convertopl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = convertopl.h; sourceTree = "<group>"; };
 		C629A569208643D20015C93C /* nuked_opl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nuked_opl.h; sourceTree = "<group>"; };
+		C632BFD325C13BD3005C5580 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = SOURCE_ROOT; };
 		C635056A1EA6570300186049 /* midi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = midi.h; path = ../../../midi.h; sourceTree = "<group>"; };
 		C635056B1EA6570300186049 /* midi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = midi.c; path = ../../../midi.c; sourceTree = "<group>"; };
 		C635057A1EA6578700186049 /* native_midi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = native_midi.h; sourceTree = "<group>"; };
@@ -548,6 +610,8 @@
 		C6743A831ECCAFA700AEF782 /* SettingsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsTableViewController.m; sourceTree = "<group>"; };
 		C6743A851ECCAFC600AEF782 /* SettingsTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingsTableViewController.h; sourceTree = "<group>"; };
 		C694CF861EB619660006F937 /* gs_instruments.dls */ = {isa = PBXFileReference; lastKnownFileType = file; name = gs_instruments.dls; path = /System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls; sourceTree = "<group>"; };
+		C69D09E525C13CE900FF3EFF /* sdlpal.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = sdlpal.entitlements; sourceTree = "<group>"; };
+		C69D0A4725C1446A00FF3EFF /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
 		C6CFDD6223A859F800DEB8F9 /* celt_lpc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = celt_lpc.h; sourceTree = "<group>"; };
 		C6CFDD6323A859F800DEB8F9 /* static_modes_fixed_arm_ne10.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = static_modes_fixed_arm_ne10.h; sourceTree = "<group>"; };
 		C6CFDD6423A859F800DEB8F9 /* cpu_support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cpu_support.h; sourceTree = "<group>"; };
@@ -759,6 +823,33 @@
 		C6CFDE8423A859F800DEB8F9 /* mapping_matrix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mapping_matrix.c; sourceTree = "<group>"; };
 		C6CFDE8523A859F800DEB8F9 /* opus_multistream.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = opus_multistream.c; sourceTree = "<group>"; };
 		C6CFDE8623A859F800DEB8F9 /* analysis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = analysis.h; sourceTree = "<group>"; };
+		C6D61DCC2619A6A4000622C2 /* resample.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = resample.h; sourceTree = "<group>"; };
+		C6D61DCD2619A6A4000622C2 /* common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = common.c; sourceTree = "<group>"; };
+		C6D61DCE2619A6A4000622C2 /* tables.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tables.c; sourceTree = "<group>"; };
+		C6D61DCF2619A6A4000622C2 /* Android.mk */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Android.mk; sourceTree = "<group>"; };
+		C6D61DD02619A6A4000622C2 /* mix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mix.h; sourceTree = "<group>"; };
+		C6D61DD12619A6A4000622C2 /* readmidi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = readmidi.c; sourceTree = "<group>"; };
+		C6D61DD22619A6A4000622C2 /* FAQ */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = FAQ; sourceTree = "<group>"; };
+		C6D61DD32619A6A4000622C2 /* CHANGES */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CHANGES; sourceTree = "<group>"; };
+		C6D61DD42619A6A4000622C2 /* playmidi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = playmidi.h; sourceTree = "<group>"; };
+		C6D61DD52619A6A4000622C2 /* instrum.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = instrum.c; sourceTree = "<group>"; };
+		C6D61DD62619A6A4000622C2 /* options.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = options.h; sourceTree = "<group>"; };
+		C6D61DD72619A6A4000622C2 /* timidity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timidity.h; sourceTree = "<group>"; };
+		C6D61DD82619A6A4000622C2 /* output.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = output.h; sourceTree = "<group>"; };
+		C6D61DD92619A6A4000622C2 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		C6D61DDA2619A6A4000622C2 /* TODO */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TODO; sourceTree = "<group>"; };
+		C6D61DDB2619A6A4000622C2 /* tables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tables.h; sourceTree = "<group>"; };
+		C6D61DDC2619A6A4000622C2 /* resample.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = resample.c; sourceTree = "<group>"; };
+		C6D61DDD2619A6A4000622C2 /* COPYING */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYING; sourceTree = "<group>"; };
+		C6D61DDE2619A6A4000622C2 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		C6D61DDF2619A6A4000622C2 /* mix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mix.c; sourceTree = "<group>"; };
+		C6D61DE02619A6A4000622C2 /* playmidi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = playmidi.c; sourceTree = "<group>"; };
+		C6D61DE12619A6A4000622C2 /* readmidi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readmidi.h; sourceTree = "<group>"; };
+		C6D61DE22619A6A4000622C2 /* output.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = output.c; sourceTree = "<group>"; };
+		C6D61DE32619A6A4000622C2 /* timidity.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = timidity.c; sourceTree = "<group>"; };
+		C6D61DE42619A6A4000622C2 /* instrum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = instrum.h; sourceTree = "<group>"; };
+		C6D61DF52619A6B2000622C2 /* midi_timidity.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = midi_timidity.c; path = ../../../midi_timidity.c; sourceTree = "<group>"; };
+		C6D61DF62619A6B3000622C2 /* midi_tsf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = midi_tsf.c; path = ../../../midi_tsf.c; sourceTree = "<group>"; };
 		E8A03C34C8311310F5BFC81E /* Pods-SDLPal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SDLPal.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SDLPal/Pods-SDLPal.debug.xcconfig"; sourceTree = "<group>"; };
 		F7379C304509DA5D22123C42 /* Pods-SDLPal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SDLPal.release.xcconfig"; path = "Pods/Target Support Files/Pods-SDLPal/Pods-SDLPal.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -768,8 +859,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C69D0AAF25C1465200FF3EFF /* libSDL2.a in Frameworks */,
+				C69D0A4825C1446A00FF3EFF /* CoreHaptics.framework in Frameworks */,
 				71655292195BBCD6006E1227 /* OpenGLES.framework in Frameworks */,
-				C6E974A21E49C24500F76B17 /* libSDL2.a in Frameworks */,
 				C622BE761E474CFC000C8970 /* AVFoundation.framework in Frameworks */,
 				C622BE721E474CD5000C8970 /* CoreMotion.framework in Frameworks */,
 				71DCB6991ED9CCFE00F120DB /* GameController.framework in Frameworks */,
@@ -956,6 +1048,7 @@
 				71655212195BB6DA006E1227 /* libmad */,
 				57FB00F01B7A50B0005FCF4C /* liboggvorbis */,
 				C63505791EA6578700186049 /* native_midi */,
+				C6D61DCB2619A6A4000622C2 /* timidity */,
 				71655066195BB372006E1227 /* SDLPal */,
 				71655067195BB372006E1227 /* Supporting Files */,
 				7165505F195BB372006E1227 /* Frameworks */,
@@ -975,6 +1068,7 @@
 		7165505F195BB372006E1227 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C69D0A4725C1446A00FF3EFF /* CoreHaptics.framework */,
 				C622BE751E474CFC000C8970 /* AVFoundation.framework */,
 				C622BE731E474CE2000C8970 /* GameController.framework */,
 				C622BE711E474CD5000C8970 /* CoreMotion.framework */,
@@ -997,6 +1091,8 @@
 				C63505771EA6575200186049 /* Headers */,
 				71DCB6941ED9CBB000F120DB /* aviplay.c */,
 				C635056B1EA6570300186049 /* midi.c */,
+				C6D61DF52619A6B2000622C2 /* midi_timidity.c */,
+				C6D61DF62619A6B3000622C2 /* midi_tsf.c */,
 				57FB015C1B7A50E0005FCF4C /* mp3play.c */,
 				57FB015D1B7A50E0005FCF4C /* oggplay.c */,
 				57FB015D2B7A50E0005FCF4C /* opusplay.c */,
@@ -1040,6 +1136,8 @@
 		71655067195BB372006E1227 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				C69D09E525C13CE900FF3EFF /* sdlpal.entitlements */,
+				C632BFD325C13BD3005C5580 /* Podfile */,
 				C66F6FD51FB16CB200F3F0DA /* iOS Launch Screen.storyboard */,
 				C626FFBF1E5BCBE700E39DD9 /* pal_config.h */,
 				C66C6CA21ECCB73100CE10C1 /* SDLPal_AppDelegate.h */,
@@ -1443,15 +1541,55 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		C6D61DCB2619A6A4000622C2 /* timidity */ = {
+			isa = PBXGroup;
+			children = (
+				C6D61DCC2619A6A4000622C2 /* resample.h */,
+				C6D61DCD2619A6A4000622C2 /* common.c */,
+				C6D61DCE2619A6A4000622C2 /* tables.c */,
+				C6D61DCF2619A6A4000622C2 /* Android.mk */,
+				C6D61DD02619A6A4000622C2 /* mix.h */,
+				C6D61DD12619A6A4000622C2 /* readmidi.c */,
+				C6D61DD22619A6A4000622C2 /* FAQ */,
+				C6D61DD32619A6A4000622C2 /* CHANGES */,
+				C6D61DD42619A6A4000622C2 /* playmidi.h */,
+				C6D61DD52619A6A4000622C2 /* instrum.c */,
+				C6D61DD62619A6A4000622C2 /* options.h */,
+				C6D61DD72619A6A4000622C2 /* timidity.h */,
+				C6D61DD82619A6A4000622C2 /* output.h */,
+				C6D61DD92619A6A4000622C2 /* README */,
+				C6D61DDA2619A6A4000622C2 /* TODO */,
+				C6D61DDB2619A6A4000622C2 /* tables.h */,
+				C6D61DDC2619A6A4000622C2 /* resample.c */,
+				C6D61DDD2619A6A4000622C2 /* COPYING */,
+				C6D61DDE2619A6A4000622C2 /* common.h */,
+				C6D61DDF2619A6A4000622C2 /* mix.c */,
+				C6D61DE02619A6A4000622C2 /* playmidi.c */,
+				C6D61DE12619A6A4000622C2 /* readmidi.h */,
+				C6D61DE22619A6A4000622C2 /* output.c */,
+				C6D61DE32619A6A4000622C2 /* timidity.c */,
+				C6D61DE42619A6A4000622C2 /* instrum.h */,
+			);
+			name = timidity;
+			path = ../../timidity;
+			sourceTree = "<group>";
+		};
 		C6E974971E49C22D00F76B17 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C6E9749D1E49C22D00F76B17 /* libSDL2.a */,
-				C6CFDE9023A859F800DEB8F9 /* libSDL2.dylib */,
-				C6E9749F1E49C22D00F76B17 /* libSDL2.a */,
-				C6CFDE9223A859F800DEB8F9 /* libSDL2.dylib */,
-				C6CFDE9423A859F800DEB8F9 /* libSDLmain.a */,
-				C6CFDE9623A859F800DEB8F9 /* libSDLmain.a */,
+				C69D0A9325C1463000FF3EFF /* SDL2.framework */,
+				C69D0A9525C1463000FF3EFF /* SDL2.framework */,
+				C69D0A9725C1463000FF3EFF /* SDL2.framework */,
+				C69D0A9925C1463000FF3EFF /* libSDL2.a */,
+				C69D0A9B25C1463000FF3EFF /* libSDL2.a */,
+				C69D0A9D25C1463000FF3EFF /* libSDL2.a */,
+				C69D0A9F25C1463000FF3EFF /* libSDL2.dylib */,
+				C69D0AA125C1463000FF3EFF /* libSDL2.dylib */,
+				C69D0AA325C1463000FF3EFF /* libSDL2.dylib */,
+				C69D0AA525C1463000FF3EFF /* SDL2 */,
+				C69D0AA725C1463000FF3EFF /* hidapi.framework */,
+				C69D0AA925C1463000FF3EFF /* hidapi.framework */,
+				C69D0AAB25C1463000FF3EFF /* hidapi.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1472,7 +1610,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				C6E974A11E49C23B00F76B17 /* PBXTargetDependency */,
+				C69D0AAD25C1463C00FF3EFF /* PBXTargetDependency */,
 			);
 			name = SDLPal;
 			productName = SDLPal;
@@ -1522,46 +1660,95 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		C6CFDE9023A859F800DEB8F9 /* libSDL2.dylib */ = {
+		C69D0A9325C1463000FF3EFF /* SDL2.framework */ = {
 			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libSDL2.dylib;
-			remoteRef = C6CFDE8F23A859F800DEB8F9 /* PBXContainerItemProxy */;
+			fileType = wrapper.framework;
+			path = SDL2.framework;
+			remoteRef = C69D0A9225C1463000FF3EFF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		C6CFDE9223A859F800DEB8F9 /* libSDL2.dylib */ = {
+		C69D0A9525C1463000FF3EFF /* SDL2.framework */ = {
 			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libSDL2.dylib;
-			remoteRef = C6CFDE9123A859F800DEB8F9 /* PBXContainerItemProxy */;
+			fileType = wrapper.framework;
+			path = SDL2.framework;
+			remoteRef = C69D0A9425C1463000FF3EFF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		C6CFDE9423A859F800DEB8F9 /* libSDLmain.a */ = {
+		C69D0A9725C1463000FF3EFF /* SDL2.framework */ = {
 			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libSDLmain.a;
-			remoteRef = C6CFDE9323A859F800DEB8F9 /* PBXContainerItemProxy */;
+			fileType = wrapper.framework;
+			path = SDL2.framework;
+			remoteRef = C69D0A9625C1463000FF3EFF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		C6CFDE9623A859F800DEB8F9 /* libSDLmain.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libSDLmain.a;
-			remoteRef = C6CFDE9523A859F800DEB8F9 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		C6E9749D1E49C22D00F76B17 /* libSDL2.a */ = {
+		C69D0A9925C1463000FF3EFF /* libSDL2.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libSDL2.a;
-			remoteRef = C6E9749C1E49C22D00F76B17 /* PBXContainerItemProxy */;
+			remoteRef = C69D0A9825C1463000FF3EFF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		C6E9749F1E49C22D00F76B17 /* libSDL2.a */ = {
+		C69D0A9B25C1463000FF3EFF /* libSDL2.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libSDL2.a;
-			remoteRef = C6E9749E1E49C22D00F76B17 /* PBXContainerItemProxy */;
+			remoteRef = C69D0A9A25C1463000FF3EFF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C69D0A9D25C1463000FF3EFF /* libSDL2.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libSDL2.a;
+			remoteRef = C69D0A9C25C1463000FF3EFF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C69D0A9F25C1463000FF3EFF /* libSDL2.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = libSDL2.dylib;
+			remoteRef = C69D0A9E25C1463000FF3EFF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C69D0AA125C1463000FF3EFF /* libSDL2.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = libSDL2.dylib;
+			remoteRef = C69D0AA025C1463000FF3EFF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C69D0AA325C1463000FF3EFF /* libSDL2.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = libSDL2.dylib;
+			remoteRef = C69D0AA225C1463000FF3EFF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C69D0AA525C1463000FF3EFF /* SDL2 */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = SDL2;
+			remoteRef = C69D0AA425C1463000FF3EFF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C69D0AA725C1463000FF3EFF /* hidapi.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = hidapi.framework;
+			remoteRef = C69D0AA625C1463000FF3EFF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C69D0AA925C1463000FF3EFF /* hidapi.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = hidapi.framework;
+			remoteRef = C69D0AA825C1463000FF3EFF /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C69D0AAB25C1463000FF3EFF /* hidapi.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = hidapi.framework;
+			remoteRef = C69D0AAA25C1463000FF3EFF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1635,6 +1822,7 @@
 				57FB01591B7A50B0005FCF4C /* window.c in Sources */,
 				57FB01521B7A50B0005FCF4C /* registry.c in Sources */,
 				C6CFDEC823A859F800DEB8F9 /* NLSF_unpack.c in Sources */,
+				C6D61DF82619A6B3000622C2 /* midi_tsf.c in Sources */,
 				C6CFDE9723A859F800DEB8F9 /* kiss_fft.c in Sources */,
 				C6CFDED223A859F800DEB8F9 /* ana_filt_bank_1.c in Sources */,
 				C6CFDF0E23A859F800DEB8F9 /* sort_FLP.c in Sources */,
@@ -1680,9 +1868,12 @@
 				C6CFDF1523A859F800DEB8F9 /* scale_vector_FLP.c in Sources */,
 				C6CFDEBD23A859F800DEB8F9 /* control_codec.c in Sources */,
 				C6CFDEFF23A859F800DEB8F9 /* code_signs.c in Sources */,
+				C6D61DE52619A6A4000622C2 /* common.c in Sources */,
 				57FB01571B7A50B0005FCF4C /* vorbisenc.c in Sources */,
 				C6CFDF2223A859F800DEB8F9 /* resampler_rom.c in Sources */,
+				C6D61DE62619A6A4000622C2 /* tables.c in Sources */,
 				57FB01631B7A50E0005FCF4C /* resampler.c in Sources */,
+				C6D61DF32619A6A4000622C2 /* timidity.c in Sources */,
 				C6CFDF0523A859F800DEB8F9 /* regularize_correlations_FLP.c in Sources */,
 				57FB01581B7A50B0005FCF4C /* vorbisfile.c in Sources */,
 				C6CFDF1B23A859F800DEB8F9 /* autocorrelation_FLP.c in Sources */,
@@ -1737,6 +1928,7 @@
 				71655269195BB6DB006E1227 /* global.c in Sources */,
 				C6CFDF2323A859F800DEB8F9 /* resampler_private_down_FIR.c in Sources */,
 				C635057F1EA6578700186049 /* native_midi_common.c in Sources */,
+				C6D61DF22619A6A4000622C2 /* output.c in Sources */,
 				C6CFDF4923A859F800DEB8F9 /* opus_stream.c in Sources */,
 				7165526A195BB6DB006E1227 /* input.c in Sources */,
 				7165526B195BB6DB006E1227 /* itemmenu.c in Sources */,
@@ -1761,6 +1953,7 @@
 				C6CFDF3823A859F800DEB8F9 /* sum_sqr_shift.c in Sources */,
 				71655274195BB6DB006E1227 /* layer3.c in Sources */,
 				C6CFDF1323A859F800DEB8F9 /* LTP_scale_ctrl_FLP.c in Sources */,
+				C6D61DF12619A6A4000622C2 /* playmidi.c in Sources */,
 				C6CFDF2F23A859F800DEB8F9 /* stereo_encode_pred.c in Sources */,
 				71655275195BB6DB006E1227 /* music_mad.c in Sources */,
 				C6CFDEB123A859F800DEB8F9 /* bands.c in Sources */,
@@ -1791,9 +1984,11 @@
 				C6CFDF3923A859F800DEB8F9 /* mlp.c in Sources */,
 				C6CFDF4523A859F800DEB8F9 /* http.c in Sources */,
 				7165527D195BB6DB006E1227 /* main.c in Sources */,
+				C6D61DEB2619A6A4000622C2 /* instrum.c in Sources */,
 				C6CFDEDF23A859F800DEB8F9 /* debug.c in Sources */,
 				C6CFDF4B23A859F800DEB8F9 /* opus_multistream.c in Sources */,
 				7165527E195BB6DB006E1227 /* map.c in Sources */,
+				C6D61DEE2619A6A4000622C2 /* resample.c in Sources */,
 				C6CFDEC123A859F800DEB8F9 /* tables_gain.c in Sources */,
 				C6CFDF0023A859F800DEB8F9 /* log2lin.c in Sources */,
 				C6CFDECD23A859F800DEB8F9 /* decode_core.c in Sources */,
@@ -1807,6 +2002,7 @@
 				C6CFDF1A23A859F800DEB8F9 /* find_LPC_FLP.c in Sources */,
 				C6CFDF0223A859F800DEB8F9 /* tables_LTP.c in Sources */,
 				C6CFDEFC23A859F800DEB8F9 /* stereo_decode_pred.c in Sources */,
+				C6D61DF02619A6A4000622C2 /* mix.c in Sources */,
 				57FB01491B7A50B0005FCF4C /* floor1.c in Sources */,
 				C6CFDF1C23A859F800DEB8F9 /* wrappers_FLP.c in Sources */,
 				C6CFDF2B23A859F800DEB8F9 /* tables_other.c in Sources */,
@@ -1817,10 +2013,12 @@
 				71655282195BB6DB006E1227 /* res.c in Sources */,
 				71655283195BB6DB006E1227 /* rixplay.cpp in Sources */,
 				C6CFDF4423A859F800DEB8F9 /* opus_projection_encoder.c in Sources */,
+				C6D61DE82619A6A4000622C2 /* readmidi.c in Sources */,
 				C6CFDEA323A859F800DEB8F9 /* laplace.c in Sources */,
 				C6CFDF1223A859F800DEB8F9 /* burg_modified_FLP.c in Sources */,
 				71655284195BB6DB006E1227 /* rngplay.c in Sources */,
 				C6CFDEDC23A859F800DEB8F9 /* tables_NLSF_CB_NB_MB.c in Sources */,
+				C6D61DF72619A6B3000622C2 /* midi_timidity.c in Sources */,
 				C6CFDE9823A859F800DEB8F9 /* rate.c in Sources */,
 				71655285195BB6DB006E1227 /* scene.c in Sources */,
 				71655286195BB6DB006E1227 /* script.c in Sources */,
@@ -1859,10 +2057,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		C6E974A11E49C23B00F76B17 /* PBXTargetDependency */ = {
+		C69D0AAD25C1463C00FF3EFF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			name = libSDL;
-			targetProxy = C6E974A01E49C23B00F76B17 /* PBXContainerItemProxy */;
+			name = "Static Library-iOS";
+			targetProxy = C69D0AAC25C1463C00FF3EFF /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1956,6 +2154,7 @@
 			baseConfigurationReference = E8A03C34C8311310F5BFC81E /* Pods-SDLPal.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = SDLPal/sdlpal.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
@@ -2002,6 +2201,7 @@
 			baseConfigurationReference = F7379C304509DA5D22123C42 /* Pods-SDLPal.release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = SDLPal/sdlpal.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";

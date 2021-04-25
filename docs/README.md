@@ -1,8 +1,8 @@
 SDLPAL
 ======
-[![Travis CI](https://travis-ci.org/sdlpal/sdlpal.svg?branch=master)](https://travis-ci.org/sdlpal/sdlpal)
+[![Travis CI](https://travis-ci.com/sdlpal/sdlpal.svg?branch=master)](https://travis-ci.com/sdlpal/sdlpal)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/sdlpal/sdlpal?branch=master&svg=true)](https://ci.appveyor.com/project/palxex/sdlpal-itfml)
-[ ![Download](https://api.bintray.com/packages/sdlpal/nightly/master/images/download.svg) ](https://bintray.com/sdlpal/nightly/master/_latestVersion)
+[ ![Download](https://api-prd.cloudsmith.io/badges/version/sdlpal/sdlpal/raw/wii/latest/x/?render=true) ](https://cloudsmith.io/~sdlpal/repos/sdlpal/groups)
 
 ***SDLPAL*** is an SDL-based open-source cross-platform reimplementation of the classic Chinese RPG game *Xiān jiàn Qí Xiá Zhuàn (Simplified Chinese: 仙剑奇侠传, Traditional Chinese: 仙劍奇俠傳)* (also known as *Chinese Paladin* or *Legend of Sword and Fairy*, or *PAL* for short).
 
@@ -23,7 +23,7 @@ Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
 Copyright (c) 2011-2018, SDLPAL development team.
 All rights reserved.
 ```
-SDLPAL is distributed under the terms of GNU General Public License, version 3 (or any later version) as published by the Free Software Foundation. See [LICENSE](LICENSE) for details.
+SDLPAL is distributed under the terms of GNU General Public License, version 3 as published by the Free Software Foundation. See [LICENSE](LICENSE) for details.
 
 Many of the ideas of this program are based on documents from [PAL Research Project](https://github.com/palxex/palresearch), and portions of the code are based on the work done by Baldur and [louyihua](https://github.com/louyihua).
 
@@ -34,6 +34,7 @@ This program made extensive use of the following libraries:
 * [libogg & libvorbis](http://www.vorbis.com/)
 * [libopus & opusfile](https://www.opus-codec.org/)
 * [FLTK](http://www.fltk.org)
+* [TinySoundFont](https://github.com/schellingb/TinySoundFont)
 * OPL player from [Adplug](http://adplug.sourceforge.net/)
 * OPL emulation cores from [DOSBOX project](http://www.dosbox.com), [MAME project](http://mamedev.org/) and [Chocolate Doom project](https://github.com/chocolate-doom/chocolate-doom)
 * Audio resampler from [foo_input_adplug](https://www.foobar2000.org/components/view/foo_input_adplug)

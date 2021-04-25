@@ -1,15 +1,14 @@
 /* -*- mode: c; tab-width: 4; c-basic-offset: 4; c-file-style: "linux" -*- */
 //
 // Copyright (c) 2009-2011, Wei Mingzhi <whistler_wmz@users.sf.net>.
-// Copyright (c) 2011-2020, SDLPAL development team.
+// Copyright (c) 2011-2021, SDLPAL development team.
 // All rights reserved.
 //
 // This file is part of SDLPAL.
 //
 // SDLPAL is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// it under the terms of the GNU General Public License, version 3
+// as published by the Free Software Foundation.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -1448,6 +1447,7 @@ PAL_BattleStartFrame(
             for (i = 0; i < MAX_ACTIONQUEUE_ITEMS; i++)
             {
                g_Battle.ActionQueue[i].wIndex = 0xFFFF;
+               g_Battle.ActionQueue[i].fIsSecond = FALSE;
                g_Battle.ActionQueue[i].wDexterity = 0xFFFF;
             }
 
@@ -1465,6 +1465,7 @@ PAL_BattleStartFrame(
 
                g_Battle.ActionQueue[j].fIsEnemy = TRUE;
                g_Battle.ActionQueue[j].wIndex = i;
+               g_Battle.ActionQueue[j].fIsSecond = FALSE;
                g_Battle.ActionQueue[j].wDexterity = PAL_GetEnemyDexterity(i);
                g_Battle.ActionQueue[j].wDexterity *= RandomFloat(0.9f, 1.1f);
 
@@ -1474,8 +1475,14 @@ PAL_BattleStartFrame(
                {
                   g_Battle.ActionQueue[j].fIsEnemy = TRUE;
                   g_Battle.ActionQueue[j].wIndex = i;
+                  g_Battle.ActionQueue[j].fIsSecond = FALSE;
                   g_Battle.ActionQueue[j].wDexterity = PAL_GetEnemyDexterity(i);
                   g_Battle.ActionQueue[j].wDexterity *= RandomFloat(0.9f, 1.1f);
+
+                  if(g_Battle.ActionQueue[j].wDexterity <= g_Battle.ActionQueue[j-1].wDexterity)
+                      g_Battle.ActionQueue[j].fIsSecond = TRUE;
+                  else
+                      g_Battle.ActionQueue[j-1].fIsSecond = TRUE;
 
                   j++;
                }
@@ -2852,6 +2859,7 @@ PAL_BattleShowEnemyMagicAnim(
 
          if (i == (gConfig.fIsWIN95 ? 0 : gpGlobals->g.lprgMagic[iMagicNum].wFireDelay))
          {
+            if(!gConfig.fIsWIN95 || g_Battle.rgEnemy[wEnemyIndex].e.wMagicSound > 0)
             AUDIO_PlaySound(gpGlobals->g.lprgMagic[iMagicNum].wSound);
          }
 
@@ -4821,6 +4829,9 @@ PAL_BattleEnemyPerformAction(
          def *= 2;
       }
 
+      if(gConfig.fIsWIN95 && g_Battle.ActionQueue[g_Battle.iCurAction].fIsSecond && g_Battle.rgEnemy[wEnemyIndex].e.wMagic == 0)
+          AUDIO_PlaySound(g_Battle.rgEnemy[wEnemyIndex].e.wMagicSound);
+      else
       AUDIO_PlaySound(g_Battle.rgEnemy[wEnemyIndex].e.wAttackSound);
 
       iCoverIndex = -1;
